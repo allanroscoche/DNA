@@ -4,202 +4,27 @@
 - SGS(Second Generation Sequencing) 35bp-400bp
 
 \section{Motivação}
-
+- Os programas como o Velvet necessitam de quantidades grandes de memória, acima de 4Gb para bactérias com 10b. Sendo que apenas computadores de grande porte conseguem atendem as necessidades do software. Estudar as possibilidades de economia de memória para que seja possível fazer o sequenciamento de seres maiores nas máquinas atuais.
 
 \section{Objetivos}
 
 
 \section{Organização do Trabalho}
 
+Este trabalho está dividido em 4 capítulos principais. No capítulof
+
 Este trabalho está dividido em três capítulos principais. No capítulo 2 a estrutura básica que compõe o Domain Name System será explicada, bem como seu funcionamento. No capítulo 3 entramos em mais detalhes sobre a segurança do DNS, quais os problemas antigos e como eles foram sanados, e também é explicada a Falha Kaminsky, o risco que ela apresentava para a internet e a correção usada. No capítulo 4 uma nova forma do ataque é proposta, e também são apresentados os resultados experimentais das tentativas de explorar a falha.
 
-\chapter{Estrutura e funcionamento básico do \textit{Domain Name System}}
-
-Desde o início das discussões sobre um espaço de nomes, sempre foi cogitada uma solução hierárquica e distribuída para a
-implementação \cite{rfc1034}. Antes de prosseguir com a estrutura, é necessário fazer algumas definições sobre os termos usados neste documento.
-
-Hoje a base de dados do DNS é indexada por nomes de domínio. Cada domínio é um caminho em uma árvore invertida. A estrutura de árvore é similar à estrutura do sistema de arquivos utilizado nos sistemas \textit{Unix}. A árvore tem uma única raiz, chamado de diretório \textit{raiz} (root) no \textit{Unix}, e representado por uma barra (/); no DNS, esse diretório é chamado simplesmente de \textit{"raiz"}, e não recebe nome.
+\chapter{Sequenciamento Sanger}
 
 \section{Gramática}
 
-A sintaxe a seguir foi feita para evitar problemas de ambiguidade e
-definições, de acordo com o RFC1035 \cite{rfc1035}:
+\section{Sequenciamento de Segunda Geração}
 
-\begin{itemize}
-\item $<$domínio$>$ ::= $<$subdomínio$> |$ " "
-\item $<$subdomínio$>$ ::= $<$rótulo$> |$ $<$subdomínio$>$ "." $<$rótulo$>$
-\item $<$rótulo$>$ ::= $<$letra$>$ [ [ $<$string$>$ ] $<$letra--dígito$>$ ]
-\item $<$string$>$ ::= $<$letra--dígito--hífem$> |$ $<$letra--dígito--hífem$>$ $<$string$>$
-\item $<$letra--dígito--hífem$>$ ::= $<$letra--dígito$> |$ --
-\item $<$letra--dígito$>$ ::= $<$letra$> |$ $<$dígito$>$
-\item $<$letra$>$ ::= qualquer um dos 52 caracteres alfabéticos de
-  \emph{A} a \emph{Z} maiúsculos e \emph{a} a \emph{z} minúsculos.
-\item $<$dígito$>$ ::= qualquer um dos dez dígitos de 0 a 9.
-\end{itemize}
+\section{Sequenciamento Denovo}
 
-Note que, apesar de serem permitidas letras maiúsculas e minúsculas, elas não tem significado diferente no DNS, de modo que o pseudo--domínio
-a.b.c deve ser o mesmo que A.B.C.
+\section{Velvet}
 
-Os rótulos devem seguir as regras da ARPANET para nomes de máquinas: devem começar com uma letra e terminar com uma letra ou dígito, e ter seu interior formado por letras, dígitos ou hífens. Rótulos devem ter menos de 64 caracteres \cite{rfc1034}.
-
-\section{Os elementos do DNS}
-
-O DNS é formado por três elementos principais \cite{rfc1034}:
-
-\begin{enumerate}
-\item \textbf{Nomes de domínio} e \textbf{Registros}, que são as
-  especificações para o espaço de nomes organizado em estrutura de
-  árvore, e os dados associados aos nomes.
-
-\item \textbf{Servidores de nomes}, que são programas de servidores que
-  contêm informações sobre a estrutura do domínio de nomes. Um Servidor de nomes pode armazenar em cache a estrutura ou os registros de
-  qualquer parte da árvore de domínio de nomes, mas geralmente um
-  servidor de nomes em particular tem informação completa sobre um
-  subconjunto do domínio de nomes, e ponteiros para outros servidores de
-  nomes, que podem ser usados para obter informações sobre qualquer
-  parte da árvore do domínio de nomes.
-  
-  Esses servidores que têm informação completa de certas partes são ditos \textbf{Autoridades}
-  para essas partes. As informações de autoridades são organizadas em
-  unidades chamadas \textbf{Zonas}.
-
-\item \textbf{Resolvedores}, são programas que extraem informação dos
-  servidores de nomes em resposta a uma requisição de um
-  cliente. Resolvedores devem ter acesso a pelo menos um servidor de
-  nomes, e usar a informação desse servidor para responder à requisição
-  diretamente, ou buscar a resposta usando referências para outros
-  servidores de nomes. Um resolvedor é geralmente uma Rotina do Sistema,
-  que pode ser diretamente acessada por programas do usuário, sem
-  necessidade de um protocolo entre ambos.
-\end{enumerate}
-
-Em nome da eficiência, esse três elementos podem ser -- e geralmente são -- acoplados em
-algumas implementações (por exemplo, um servidor de nomes pode dividir
-seu cache com um resolvedor, melhorando o tempo de resposta no caso
-geral).
-
-\section{Nomes de Domínio e Registros}
-
-\subsection{Nomes de Domínio}
-Como já citado anteriormente, o Sistema de Nomes de Domínios é
-organizado em estrutura de árvore, onde cada nodo e cada folha contém um
-conjunto de informações, podendo este conjunto ser vazio
-\cite{rfc1034}. Cada nodo deve ter um rótulo, cujo tamanho varia entre 0
-e 63 octetos, sendo que o nome de tamanho zero (nulo), é reservado
-para a raiz. Nodos irmãos não podem ter o mesmo nome, mas não há
-problema se nodos não irmãos tiverem nomes iguais.
-
-Por exemplo, só pode existir um nodo com o nome \textit{inf} sob o domínio \textit{ufpr.br}, mas não há problemas com o domínio \textit{inf.ufsc.br}, pois apesar de ambos estarem sob o domínio \textit{.br}, um deles está em \textit{ufpr.br} e o outro em \textit{ufsc.br}, o que faz com que sejam nodos não irmãos.
-
-O nome de domínio de um nodo é a lista de rótulos do nodo até a
-raiz. Por convenção, os nomes são escritos e lidos da esquerda para a
-direita, do mais específico (nome mais perto do nó) para o menos
-específico (nodo mais perto da raiz). Os resolvedores tratam da mesma
-forma letras maiúsculas e minúsculas, mas os nomes de domínios devem
-guardar rótulos sem ignorar essa diferença, mantendo o nome original do
-domínio. A justificativa dessa decisão é que, eventualmente, pode ser
-necessário diferenciar nomes em caixa alta e caixa baixa, e a
-implementação atual garante que nenhum serviço tenha que ser
-drasticamente alterado \cite{rfc1034}.
-
-Para simplificar implementações do DNS, o tamanho máximo de octetos de
-um nome de domínio é limitado a 255 caracteres \cite{rfc1034} -- não confundir com os 63 octetos que formam um rótulo; um domínio pode ser formado por vários rótulos que possuem no máximo 63 caracteres, e o domínio por sua vez pode atingir no máximo 255 caracteres.
-
-\subsection{Registros}
-
-Cada nodo da árvore de nomes de domínio possui um conjunto de
-informações de registros, que pode ser vazio. A ordenação de registros
-em um conjunto não é significante, e não precisa ser mantida. Um registro deve ter as seguintes informações \cite{comer}:
-
-\begin{tabular}{ l p{0.82\textwidth} }
-\textbf{Dono} & Em qual nome de domínio esse registro é
-  encontrado.\\
-\textbf{Tipo} & É um código de 16 bits; guarda o tipo de recurso
-  desse registro. Como padrão, são especificados os seguintes tipos
-  \cite{rfc1034}:\\
-
-  & \begin{tabular}{ l p{0.70\textwidth} }
-      \emph{A} & Endereço de um servidor em notação IPv4\\
-      \emph{AAAA} & Endereço de um servidor em notação IPv6\\
-      \emph{CNAME} & Nome Canônico de um \textit{Alias}\\
-      \emph{HINFO} & Traz informações sobre CPU e Sistema Operacional do
-      servidor.\\
-      \emph{MX} & Informações sobre o comutador de \textit{e-mails}
-      (\textit{Mail eXchanger}) associado ao servidor.\\
-      \emph{NS} & Nome do servidor com autoridade sobre o domínio.\\
-      \emph{PTR} & Ponteiro para outro domínio de nomes.\\
-      \emph{SOA} & \textit{Start of Authority} -- Identifica o início de
-      uma Zona de Autoridade.
-    \end{tabular}\\
-
-  \textbf{Classe} & É um valor de 16 bits que identifica a família de um
-  protocolo ou uma instância de um protocolo. Os valores especificados
-  \cite{rfc1034} são:\\
-  & \begin{tabular}{ l p{0.70\textwidth} }
-      \emph{IN} & O sistema Internet\\
-      \emph{CH} & O sistema \textit{Chaos}
-    \end{tabular}\\
-  \textbf{TTL} & \textit{Time to Live}. Esse campo é um inteiro de 32
-  bits, e representa o tempo máximo, em segundos, que um registro pode
-  ficar armazenado em cache. Ao fim desse tempo, o registro deve ser
-  descartado.\\
-  \textbf{RDATA} & O campo com o \textbf{tipo} dos dados, e, eventualmente, dados
-  dependentes da classe dos dados.\\
-\end{tabular}
-
-As figuras \ref{pacote-cliente} e \ref{pacote-servidor} demonstram todos os campos de um pacote de requisição DNS.
-
-
-\begin{figure}[p] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
-\begin{center}
-\includegraphics[scale=.7]{./figuras/dns-packet-client-server.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
-\end{center}
-\caption[Pacote DNS do cliente para o servidor]{Esquema dos campos de um pacote DNS sendo enviado de um cliente para um servidor, de acordo com o RFC1034 \cite{rfc1034}, retirado de \cite{steve}}
-\label{pacote-cliente}
-\end{figure}
-
-\begin{figure}[p] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
-\begin{center}
-\includegraphics[scale=.7]{./figuras/dns-packet-server-client.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
-\end{center}
-\caption[Pacote DNS do servidor para o cliente]{Esquema dos campos de um pacote DNS sendo enviado de um servidor para um cliente, de acordo com o RFC1034 \cite{rfc1034}, retirado de \cite{steve}}
-\label{pacote-servidor}
-\end{figure}
-
-
-
-\section{Servidores de nomes}
-
-Servidores de nomes são repositórios de informações que, juntos, compõe
-a árvore do DNS \cite{albitz}. As informações contidas em um servidor de
-nomes pode ser obtida através de um arquivo local (chamado
-\textit{master file}) ou a partir de outros servidores de nomes.
-
-Os servidores que obtém os dados por um arquivo de configuração são
-chamados de pri\-má\-rios, e os outros, secundários. A informação de um
-servidor primário é replicada para vários servidores secundários para
-garantir a redundância dos dados.
-
-Todo servidor tem informação autoritária sobre uma zona, e alguns servidores podem ser autoridades para várias zonas. Nos servidores de autoridade, os nomes para os quais eles são autoridade estão guardados no \textit{master file}, e suas traduções nunca ficam em cache. Para garantir a segurança por redundância, um domínio deve estar em pelo menos dois servidores de autoridade, e não existe número máximo de servidores para um domínio. Além disso esses dois servidores necessariamente devem estar topologicamente separados \cite{ns-rules}.
-
-\section{Tradução de um nome}
-
-Do ponto de vista de um Resolvedor recursivo, o algoritmo em alto nível para traduzir um nome tem 4 passos \cite{rfc1034}:
-
-\begin{enumerate}
-  \item Procurar a resposta em informação local (cache). Se encontrada, retornar a resposta ao cliente;
-  \item Encontrar os melhores Servidores de Nomes para perguntar a tradução;
-  \item Enviar a pergunta para todos os servidores encontrados até que um deles responda;
-  \item Analisar a resposta:
-  \begin{itemize}
-    \item Se a resposta contiver um erro ou uma tradução do nome requisitado, guarde o resultado em cache e retorne-o para o cliente;
-    \item Se a resposta apontar para uma zona melhor para fazer a pergunta, guarde essa informação em cache e volte ao passo 2;
-    \item Se a resposta contiver um CNAME, isso é, um nome canônico, isso significa que o nome procurado era apenas um \textit{alias} para esse nome. Guarde a tradução do nome normal para o nome canônico em cache, mude o nome buscado para aquele obtido na resposta com o CNAME e volte ao passo 1;
-    \item Se a resposta mostrar algum erro de servidor, ou qualquer outro tipo de resposta não prevista, exclua esse servidor da lista e volte ao passo 3.
-  \end{itemize}
-\end{enumerate}
-
-O algoritmo seguido por um Servidor de Nomes para lidar com uma requisição de tradução é um pouco mais longo, mas para o objetivo deste trabalho, ele não é importante. Maiores informações podem ser encontradas no RFC1034 \cite[p.~24--25]{rfc1034}.
 
 \chapter{Falha de segurança no DNS}
 
