@@ -11,308 +11,51 @@
 
 \section{Organização do Trabalho}
 
-Este trabalho está dividido em três capítulos principais. No capítulo 2 a estrutura básica que compõe o Domain Name System será explicada, bem como seu funcionamento. No capítulo 3 entramos em mais detalhes sobre a segurança do DNS, quais os problemas antigos e como eles foram sanados, e também é explicada a Falha Kaminsky, o risco que ela apresentava para a internet e a correção usada. No capítulo 4 uma nova forma do ataque é proposta, e também são apresentados os resultados experimentais das tentativas de explorar a falha.
-
-\chapter{Estrutura e funcionamento básico do \textit{Domain Name System}}
-
-Desde o início das discussões sobre um espaço de nomes, sempre foi cogitada uma solução hierárquica e distribuída para a
-implementação \cite{rfc1034}. Antes de prosseguir com a estrutura, é necessário fazer algumas definições sobre os termos usados neste documento.
-
-Hoje a base de dados do DNS é indexada por nomes de domínio. Cada domínio é um caminho em uma árvore invertida. A estrutura de árvore é similar à estrutura do sistema de arquivos utilizado nos sistemas \textit{Unix}. A árvore tem uma única raiz, chamado de diretório \textit{raiz} (root) no \textit{Unix}, e representado por uma barra (/); no DNS, esse diretório é chamado simplesmente de \textit{"raiz"}, e não recebe nome.
-
-\section{Gramática}
-
-A sintaxe a seguir foi feita para evitar problemas de ambiguidade e
-definições, de acordo com o RFC1035 \cite{rfc1035}:
-
-\begin{itemize}
-\item $<$domínio$>$ ::= $<$subdomínio$> |$ " "
-\item $<$subdomínio$>$ ::= $<$rótulo$> |$ $<$subdomínio$>$ "." $<$rótulo$>$
-\item $<$rótulo$>$ ::= $<$letra$>$ [ [ $<$string$>$ ] $<$letra--dígito$>$ ]
-\item $<$string$>$ ::= $<$letra--dígito--hífem$> |$ $<$letra--dígito--hífem$>$ $<$string$>$
-\item $<$letra--dígito--hífem$>$ ::= $<$letra--dígito$> |$ --
-\item $<$letra--dígito$>$ ::= $<$letra$> |$ $<$dígito$>$
-\item $<$letra$>$ ::= qualquer um dos 52 caracteres alfabéticos de
-  \emph{A} a \emph{Z} maiúsculos e \emph{a} a \emph{z} minúsculos.
-\item $<$dígito$>$ ::= qualquer um dos dez dígitos de 0 a 9.
-\end{itemize}
-
-Note que, apesar de serem permitidas letras maiúsculas e minúsculas, elas não tem significado diferente no DNS, de modo que o pseudo--domínio
-a.b.c deve ser o mesmo que A.B.C.
-
-Os rótulos devem seguir as regras da ARPANET para nomes de máquinas: devem começar com uma letra e terminar com uma letra ou dígito, e ter seu interior formado por letras, dígitos ou hífens. Rótulos devem ter menos de 64 caracteres \cite{rfc1034}.
-
-\section{Os elementos do DNS}
-
-O DNS é formado por três elementos principais \cite{rfc1034}:
-
-\begin{enumerate}
-\item \textbf{Nomes de domínio} e \textbf{Registros}, que são as
-  especificações para o espaço de nomes organizado em estrutura de
-  árvore, e os dados associados aos nomes.
-
-\item \textbf{Servidores de nomes}, que são programas de servidores que
-  contêm informações sobre a estrutura do domínio de nomes. Um Servidor de nomes pode armazenar em cache a estrutura ou os registros de
-  qualquer parte da árvore de domínio de nomes, mas geralmente um
-  servidor de nomes em particular tem informação completa sobre um
-  subconjunto do domínio de nomes, e ponteiros para outros servidores de
-  nomes, que podem ser usados para obter informações sobre qualquer
-  parte da árvore do domínio de nomes.
-  
-  Esses servidores que têm informação completa de certas partes são ditos \textbf{Autoridades}
-  para essas partes. As informações de autoridades são organizadas em
-  unidades chamadas \textbf{Zonas}.
-
-\item \textbf{Resolvedores}, são programas que extraem informação dos
-  servidores de nomes em resposta a uma requisição de um
-  cliente. Resolvedores devem ter acesso a pelo menos um servidor de
-  nomes, e usar a informação desse servidor para responder à requisição
-  diretamente, ou buscar a resposta usando referências para outros
-  servidores de nomes. Um resolvedor é geralmente uma Rotina do Sistema,
-  que pode ser diretamente acessada por programas do usuário, sem
-  necessidade de um protocolo entre ambos.
-\end{enumerate}
-
-Em nome da eficiência, esse três elementos podem ser -- e geralmente são -- acoplados em
-algumas implementações (por exemplo, um servidor de nomes pode dividir
-seu cache com um resolvedor, melhorando o tempo de resposta no caso
-geral).
-
-\section{Nomes de Domínio e Registros}
-
-\subsection{Nomes de Domínio}
-Como já citado anteriormente, o Sistema de Nomes de Domínios é
-organizado em estrutura de árvore, onde cada nodo e cada folha contém um
-conjunto de informações, podendo este conjunto ser vazio
-\cite{rfc1034}. Cada nodo deve ter um rótulo, cujo tamanho varia entre 0
-e 63 octetos, sendo que o nome de tamanho zero (nulo), é reservado
-para a raiz. Nodos irmãos não podem ter o mesmo nome, mas não há
-problema se nodos não irmãos tiverem nomes iguais.
-
-Por exemplo, só pode existir um nodo com o nome \textit{inf} sob o domínio \textit{ufpr.br}, mas não há problemas com o domínio \textit{inf.ufsc.br}, pois apesar de ambos estarem sob o domínio \textit{.br}, um deles está em \textit{ufpr.br} e o outro em \textit{ufsc.br}, o que faz com que sejam nodos não irmãos.
-
-O nome de domínio de um nodo é a lista de rótulos do nodo até a
-raiz. Por convenção, os nomes são escritos e lidos da esquerda para a
-direita, do mais específico (nome mais perto do nó) para o menos
-específico (nodo mais perto da raiz). Os resolvedores tratam da mesma
-forma letras maiúsculas e minúsculas, mas os nomes de domínios devem
-guardar rótulos sem ignorar essa diferença, mantendo o nome original do
-domínio. A justificativa dessa decisão é que, eventualmente, pode ser
-necessário diferenciar nomes em caixa alta e caixa baixa, e a
-implementação atual garante que nenhum serviço tenha que ser
-drasticamente alterado \cite{rfc1034}.
-
-Para simplificar implementações do DNS, o tamanho máximo de octetos de
-um nome de domínio é limitado a 255 caracteres \cite{rfc1034} -- não confundir com os 63 octetos que formam um rótulo; um domínio pode ser formado por vários rótulos que possuem no máximo 63 caracteres, e o domínio por sua vez pode atingir no máximo 255 caracteres.
-
-\subsection{Registros}
-
-Cada nodo da árvore de nomes de domínio possui um conjunto de
-informações de registros, que pode ser vazio. A ordenação de registros
-em um conjunto não é significante, e não precisa ser mantida. Um registro deve ter as seguintes informações \cite{comer}:
-
-\begin{tabular}{ l p{0.82\textwidth} }
-\textbf{Dono} & Em qual nome de domínio esse registro é
-  encontrado.\\
-\textbf{Tipo} & É um código de 16 bits; guarda o tipo de recurso
-  desse registro. Como padrão, são especificados os seguintes tipos
-  \cite{rfc1034}:\\
-
-  & \begin{tabular}{ l p{0.70\textwidth} }
-      \emph{A} & Endereço de um servidor em notação IPv4\\
-      \emph{AAAA} & Endereço de um servidor em notação IPv6\\
-      \emph{CNAME} & Nome Canônico de um \textit{Alias}\\
-      \emph{HINFO} & Traz informações sobre CPU e Sistema Operacional do
-      servidor.\\
-      \emph{MX} & Informações sobre o comutador de \textit{e-mails}
-      (\textit{Mail eXchanger}) associado ao servidor.\\
-      \emph{NS} & Nome do servidor com autoridade sobre o domínio.\\
-      \emph{PTR} & Ponteiro para outro domínio de nomes.\\
-      \emph{SOA} & \textit{Start of Authority} -- Identifica o início de
-      uma Zona de Autoridade.
-    \end{tabular}\\
-
-  \textbf{Classe} & É um valor de 16 bits que identifica a família de um
-  protocolo ou uma instância de um protocolo. Os valores especificados
-  \cite{rfc1034} são:\\
-  & \begin{tabular}{ l p{0.70\textwidth} }
-      \emph{IN} & O sistema Internet\\
-      \emph{CH} & O sistema \textit{Chaos}
-    \end{tabular}\\
-  \textbf{TTL} & \textit{Time to Live}. Esse campo é um inteiro de 32
-  bits, e representa o tempo máximo, em segundos, que um registro pode
-  ficar armazenado em cache. Ao fim desse tempo, o registro deve ser
-  descartado.\\
-  \textbf{RDATA} & O campo com o \textbf{tipo} dos dados, e, eventualmente, dados
-  dependentes da classe dos dados.\\
-\end{tabular}
-
-As figuras \ref{pacote-cliente} e \ref{pacote-servidor} demonstram todos os campos de um pacote de requisição DNS.
-
-
-\begin{figure}[p] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
-\begin{center}
-\includegraphics[scale=.7]{./figuras/dns-packet-client-server.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
-\end{center}
-\caption[Pacote DNS do cliente para o servidor]{Esquema dos campos de um pacote DNS sendo enviado de um cliente para um servidor, de acordo com o RFC1034 \cite{rfc1034}, retirado de \cite{steve}}
-\label{pacote-cliente}
-\end{figure}
-
-\begin{figure}[p] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
-\begin{center}
-\includegraphics[scale=.7]{./figuras/dns-packet-server-client.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
-\end{center}
-\caption[Pacote DNS do servidor para o cliente]{Esquema dos campos de um pacote DNS sendo enviado de um servidor para um cliente, de acordo com o RFC1034 \cite{rfc1034}, retirado de \cite{steve}}
-\label{pacote-servidor}
-\end{figure}
-
-
-
-\section{Servidores de nomes}
-
-Servidores de nomes são repositórios de informações que, juntos, compõe
-a árvore do DNS \cite{albitz}. As informações contidas em um servidor de
-nomes pode ser obtida através de um arquivo local (chamado
-\textit{master file}) ou a partir de outros servidores de nomes.
-
-Os servidores que obtém os dados por um arquivo de configuração são
-chamados de pri\-má\-rios, e os outros, secundários. A informação de um
-servidor primário é replicada para vários servidores secundários para
-garantir a redundância dos dados.
-
-Todo servidor tem informação autoritária sobre uma zona, e alguns servidores podem ser autoridades para várias zonas. Nos servidores de autoridade, os nomes para os quais eles são autoridade estão guardados no \textit{master file}, e suas traduções nunca ficam em cache. Para garantir a segurança por redundância, um domínio deve estar em pelo menos dois servidores de autoridade, e não existe número máximo de servidores para um domínio. Além disso esses dois servidores necessariamente devem estar topologicamente separados \cite{ns-rules}.
-
-\section{Tradução de um nome}
-
-Do ponto de vista de um Resolvedor recursivo, o algoritmo em alto nível para traduzir um nome tem 4 passos \cite{rfc1034}:
-
-\begin{enumerate}
-  \item Procurar a resposta em informação local (cache). Se encontrada, retornar a resposta ao cliente;
-  \item Encontrar os melhores Servidores de Nomes para perguntar a tradução;
-  \item Enviar a pergunta para todos os servidores encontrados até que um deles responda;
-  \item Analisar a resposta:
-  \begin{itemize}
-    \item Se a resposta contiver um erro ou uma tradução do nome requisitado, guarde o resultado em cache e retorne-o para o cliente;
-    \item Se a resposta apontar para uma zona melhor para fazer a pergunta, guarde essa informação em cache e volte ao passo 2;
-    \item Se a resposta contiver um CNAME, isso é, um nome canônico, isso significa que o nome procurado era apenas um \textit{alias} para esse nome. Guarde a tradução do nome normal para o nome canônico em cache, mude o nome buscado para aquele obtido na resposta com o CNAME e volte ao passo 1;
-    \item Se a resposta mostrar algum erro de servidor, ou qualquer outro tipo de resposta não prevista, exclua esse servidor da lista e volte ao passo 3.
-  \end{itemize}
-\end{enumerate}
-
-O algoritmo seguido por um Servidor de Nomes para lidar com uma requisição de tradução é um pouco mais longo, mas para o objetivo deste trabalho, ele não é importante. Maiores informações podem ser encontradas no RFC1034 \cite[p.~24--25]{rfc1034}.
-
-\chapter{Falha de segurança no DNS}
-
-Em Julho de 2008 foi anunciado pelo \textit{CERT} (\textit{Computer Emergency Readiness Team} -- Time de prontidão a emergências computacionais) que o pesquisador de segurança Dan Kaminsky havia descoberto uma falha fundamental no protocolo do DNS, definido nos RFC's 1034 \cite{rfc1034} e 1035 \cite{rfc1035}.
-
-Para entender melhor a natureza dessa falha, é preciso antes entender como funcionava a segurança nas consultas de DNS antes de 2008.
-
-\section{Protocolo antigo de segurança}
-
-Como visto anteriormente, ao receber uma pergunta de um usuário, o Resolvedor envia requisições para vários servidores ao mesmo tempo; a resposta que ele receber primeiro será considerada como a correta, e as outras serão ignoradas \cite{rfc1034}. Isso cria uma condição de corrida entre os servidores sendo consultados.
-
-Para garantir que a resposta vem de um dos servidores, cada requisição enviada possui um número de identificação único, chamado de ID de requisição (\textit{query ID}). A resposta de uma requisição deveria ter o mesmo ID da requisição.
-
-Nas primeiras versões das implementações, esse número era sequencial, o que fazia com que fosse muito fácil descobrir qual o próximo número no contador local do Resolvedor \cite{steve}. Desse modo, é possível forjar uma resposta a uma requisição, usando o endereço de um dos servidores de nome de autoridade, e entregar uma resposta falsa, que será guardada em cache e usada para outras perguntas sobre a mesma zona.
-
-As versões posteriores das implementações do DNS tomaram um cuidado maior com a segurança desse número de identificação e o tornaram aleatório. Esse protocolo de segurança durou até 2008, quando o pesquisador Kaminsky descobriu uma falha que permitia o envenenamento da cache, que atingia a maioria das implementações do DNS (as poucas exceções foram \textit{DJBDNS}, \textit{PowerDNS}, \textit{MaraDNS} e \textit{Unbound}) \cite{steve}.
-
-\section{A falha Kaminsky}
-
-Com a aleatoriedade do número de \textit{queryID}, ficou muito mais complexo usar o ataque para envenenamento de cache, uma vez que esse número é formado por 16 bits, ou seja, são 65.536 possíveis valores, e uma janela de tempo razoavelmente pequena para que esse número seja adivinhado.
-
-Mas mesmo a chance sendo pequena, Kaminsky notou que não existia um limite de tentativas. Segundo o próprio Kaminsky, em uma entrevista para a versão on-line da revista Wired: "é como uma corrida em que você decide quando será a largada" \cite{interview}.
-
-Ao lançar o ataque escrito por Kaminsky na ferramenta de teste Metasploit \cite{metasploit}, observa-se que é possível enviar em média 100 respostas forjadas para cada requisição enviada. Isso é, aproximadamente, uma chance em 656, o que pode parecer uma possibilidade tão pequena que deveria ser descartada. No entanto, como não existe limite de tentativas, e disparar requisições aleatórias é um processo muito rápido, Kaminsky reportou que seu ataque envenenava o cache do servidor alvo em cerca de 10 segundos \cite{steve}. Podemos observar o ataque esquematizado na figura \ref{ataque}.
-
-\begin{figure}[p] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
-\begin{center}
-\includegraphics[scale=.5]{./figuras/badguy-kaminsky-poison-dns.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
-\end{center}
-\caption[Esquema do ataque]{Esquema do ataque Kaminsky, retirado de \cite{steve}}
-\label{ataque}
-\end{figure}
-
-Até então a única coisa feita foi reinventar um ataque de envenenamento que já existia e teoricamente fora eliminado. Mas Kaminsky foi além. O normal do ataque é simplesmente roubar um domínio específico.
-
-Por exemplo, no domínio \emph{inf.ufpr.br}, o que ataques clássicos fariam é roubar para si a tradução do nome \emph{inf}, mas, seguindo as regras do DNS \cite{rfc1034}, se um servidor de autoridade responder em sua sessão adicional que ele também é uma autoridade para o \emph{.br}, o cache do resolvedor alvo será sobrescrito, e então esse ataque pode roubar os chamados \textit{Top Level Domains} (TLD), que são os domínios mais próximos da raiz, e tem mais nodos sob sua delegação.
-
-Seguindo o mesmo padrão, seria possível roubar a autoridade do \emph{.com}, \emph{.net}, e todos os principais TLD's de qualquer servidor de nome que não seja autoridade para esse TLD \cite{steve}.
-
-A técnica consiste em gerar uma string aleatória sob o domínio que se deseja envenenar, e sempre exigir uma resposta de autoridade, negando assim qualquer resposta que possa haver em cache e exigindo que o resolvedor envie requisições para outros servidores. Ao receber uma resposta, os registros em cache eram sempre reescritos com a informação mais recente, ou seja, ainda que o domínio procurado já estivesse em cache, ele seria substituído pela resposta forjada.
-
-Essa técnica passou a ser conhecida como Ataque Kaminsky.
-
-\section{Riscos do ataque}
-
-A organização em árvore fez com que nenhum nodo do DNS tenha conhecimento da rede inteira, apenas da zona pela qual está responsável.
-
-São raros os programas que não usam DNS. Especulou-se se o problema de envenenamento não poderia ser resolvido usando SSL para sites de informações sigilosas, mas muitas entidades certificadoras enviam seus certificados por e-mail, que por sua vez usa o DNS. Se um atacante conseguir envenenar o resolvedor usado por uma entidade certificadora, pode conseguir receber certificados válidos para vários sites que podem ser forjados.
-
-Além dos riscos óbvios de poder forjar sites que recebem dados sigilosos, como bancos, o envenenamento de um servidor muito requisitado permite ao atacante induzir anomalias do tipo \textit{Flash Crowd}\footnote{Flash Crowd caracteriza quando, por algum motivo, uma página na internet fica muito popular. O excesso de visitas em um curto período de tempo cria um ataque distribuído de negação de serviço (DDoS) e faz com que a página fique indisponível \cite{flashcrowd}}, redirecionando um tráfego muito grande para o site que será a vítima.
-
-Como já mencionado, servidores de e-mail precisam de traduções de nomes, inclusive e-mails bancários, governamentais e militares, contendo mensagens confidenciais. Em outras palavras uma série de envenenamentos de cache bem sucedidos permitiria ao atacante controle sobre o tráfego na internet e acesso a muitas informações confidenciais.
-
-\section{Correção de segurança}
-
-Os 16 bits que compõe o identificador da mensagem acabou se revelando, apesar de tudo, um espaço de busca relativamente pequeno. A primeira ideia que pode ocorrer é aumentar esse espaço para 32 bits; no entanto isso é impossível de ser feito em pouco tempo, uma vez que uma mudança no formato do pacote quebraria o DNS na internet \cite{steve}. A solução foi copiada da implementação do DNS criada pelo Professor Daniel J. Bernstein, o \textit{DJBDNS}, uma das poucas implementações que não eram vulneráveis ao ataque.
-
-Inventado pelo criptógrafo e professor da Universidade de Ilinóis, Chicago, Daniel J. Bernstein, o \textit{DJBDNS} funciona de maneira parecida aos outros programas afetados pelo ataque Kaminsky, mas com uma diferença fundamental.
-
-Era prática comum usar a porta UDP 53 para enviar requisições entre servidores e resolvedores DNS \cite{rfc1035}, mas o \textit{DJBDNS} usava uma porta aleatória a cada nova requisição, dado que usar a porta 53 é apenas uma recomendação e não uma regra. Com isso, além de acertar o número de identificação da requisição, também é preciso que a resposta seja enviada para a porta correta.
-
-Isso diminui drasticamente as chances de um atacante ser bem sucedido, uma vez que é natural servidores pré-alocarem 2500 portas UDP para serem aleatoriamente usadas pelo DNS \cite{steve}. Para efeitos de cálculos, considere como sendo 2048, ou $2^{11}$ portas pré-alocadas. Isso resulta em:
-
-$2^{11}$ portas $\times 2^{16}$ possibilidades de identificadores $= 2^{27}$, ou seja, mais de 134 milhões de combinações possíveis.
-
-Ainda que um atacante consiga produzir 100 pacotes por requisição, as chances dele conseguir acertar a combinação e envenenar o cache de um servidor é de uma em 1,340 milhão, isto é, aproximadamente 2.042 vezes menos provável que a versão antiga da implementação.
-
-Além disso, alguns programas populares que implementam o DNS, como o BIND, mudaram as regras sobre quando um registro em cache pode ser sobrescrito. A descoberta do ataque Kaminsky promoveu a maior atualização em massa desde que o DNS foi inventado \cite{steve}.
-
-\chapter{Implementando um novo ataque}
-
-Com a aleatoriedade das portas, o problema foi aparentemente sanado. Mas a condição de corrida ainda existe, apesar da possibilidade de um atacante conseguir sucesso no envenenamento é visivelmente menor. As correções lançadas oficialmente, no entanto, não levaram em conta a possibilidade de um ataque distribuído.
-
-\section{Ataques distribuídos}
-
-A possibilidade de envenenamento com $2^{16}$ combinações era pequena, mas matematicamente plausível, e Kaminsky provou que esse risco não poderia ser ignorado. Com portas aleatórias que multiplicam o número de combinações por um número entre $2^{11}$ e $2^{12}$ possibilidades, o risco é tão baixo que é matematicamente descartável. Essa aleatoriedade, no entanto, ainda pode ser atacada de forma distribuída.
-
-Se for usada uma rede grande o suficiente para se equiparar ao número de portas sendo aleatorizadas, com cada nodo da rede sendo responsável por uma das 2500 portas, implementando o ataque desenvolvido por Kaminsky, reduzimos as possibilidades ao mesmo cenário que Kaminsky encontrou em 2008. Resta então saber se uma rede de 2500 nodos ou mais é uma possibilidade plausível.
-
-\section{Redes zumbis}
-
-Uma rede zumbi, ou \textit{botnet}, é uma rede de computadores infectados com um programa malicioso que permite ao atacante ter controle remoto dos computadores sem o conhecimento do usuário \cite{economics}.
-
-Geralmente o código malicioso se replica automaticamente de nodo para nodo, seja através da internet, rede local, e-mails, ou por dispositivos de transporte de dados, como pendrives.
-
-Segundo dados da Kaspersky Labs, uma rede zumbi pode crescer rapidamente a números assustadores. Nos três primeiros meses de 2011 a praga \emph{TDL-4} infectou 4.524.488 no mundo inteiro \cite{TDL4}, e essa não é a maior rede da qual se tem notícia. O \textit{worm} Conficker, criado em 2008, chegou a um pico de 7 milhões de máquinas infectadas \cite{lessons-learned}, e hoje, depois de várias correções e vacinas lançadas, tem uma rede estimada em 3.541.209 nodos \cite{conficker-whitepaper}.
-
-A conclusão que que se pode chegar com esses números é que existem botnets muito maiores do que o necessário para atacar cada uma das portas sendo aleatorizadas. Uma rede zumbi com 2500 nodos é até um número simplório diante das redes zumbis modernas. Considerando então uma rede de 100 mil nodos, e ainda considerando a conta que nos apresentou com 134 milhões de possibilidades de combinações de \textit{queryID} e porta UDP, se cada nodo conseguir enviar 50 mensagens por requisição, existe uma chance de acerto de aproximadamente uma em 26, ou seja, ainda mais provável do que o ataque original usando apenas uma porta e uma máquina atacante.
-
-\section{A implementação do ataque distribuído}
-
-Para provar a possibilidade de envenenamento de um servidor com um ataque distribuído, os testes deveriam passar por 3 fases:
-\begin{enumerate}
-  \item Verificar que um servidor atual, com as correções aplicadas é imune ao ataque
-  \item Envenenar um servidor antigo com o ataque escrito em 2008 por Kaminsky
-  \item Tentar envenenar o cache de um servidor atual simulando um ataque distribuído em menor escala.
-\end{enumerate}
-
-Para simular o ataque distribuído em pequena escala, a solução adotada foi reduzir o número de portas a apenas 2, e usar uma rede com 2 nodos, e gradualmente aumentar o número de portas no servidor alvo e o número de nodos na rede para realizar o ataque.
-
-Como servidor de nomes alvo foi usado um MacBook Pro com MacOSX 10.6.8 rodando BIND nas versões 9.6.0, 9.4.2rc2 e 9.2.7. Os nodos atacantes estavam rodando o LiveCD do Backtrack Linux 4, e utilizando o ataque implementado pelo próprio Dan Kaminsky no framework Metasploit. Como saída para a internet foi usado outro MacBook Pro, com conexão de 3G, uma vez que a conexão da internet da UFPR não permite a saída de pacotes de DNS. O Masterfile do servidor de DNS não foi configurado com nenhum endereço inicialmente, de modo que ele tivesse que consultar outros servidores para qualquer requisição que recebesse. Todos os computadores usados na simulação estavam física e logicamente na mesma rede.
-
-Ao tentar verificar a imunidade dos servidores atuais ocorreu um resultado surpreendente. Ainda que com uma chance irrisória, rodando o ataque a partir de 3 nodos diferentes, houve sucesso no envenenamento do cache do servidor alvo. No entanto, como esperado -- dada a pequena possibilidade --, não foi possível repetir o envenenamento nas tentativas seguintes.
-
-Quando foi utilizada uma versão antiga do BIND para testar o ataque, verificou-se que todas as versões anteriores haviam recebido o pacote de correção lançado em 2008. Assumiu-se então que a única mudança efetuada foi aquela amplamente divulgada; tornar aleatórias as portas UDP's alocadas para comunicação com outros servidores. Função foi então modificada nos arquivos de configuração para permitir que apenas a porta 53 fosse usada, assumindo que isso seria o suficiente para simular o cenário de 2008. Para essa simulação foi usado um BIND 9.4.2rc2. Como não foi obtido sucesso em nenhuma das tentativas, supos-se que essa versão tivesse recebido mais atualizações além da divulgada, então foi usada uma versão ainda mais antiga, o BIND 9.2.7.
-
-Com a falta de sucesso nos testes com a versão mais antiga, foi necessário explorar o código-fonte. Foi constatado que o ISC -- Internet System Consortium, consórcio responsável pelo BIND -- não divulgou todas as correções lançadas. Entre as correções não divulgadas está uma verificação de MAC ADDRESS do solicitante e dos resolvedores de nomes. O ataque implementado por Dan Kaminsky mascara o IP da máquina que responde a requisição com pacotes forjados, mas não altera o MAC ADDRESS. O excesso de pacotes enviados pelo mesmo endereço faz com que o servidor descarte as mensagens recebidas.
-
-Além disso, para sobrescrever o cache com registros de alto nível -- os \textit{Top Level Domains} ou TLD -- era necessário o envio de um pacote criptografado com a chave privada do servidor de nomes -- recurso que anteriormente era opcional, e costumava estar desabilitado, mas recentemente tornou-se habilitado por padrão.
-
-Sendo assim, o ataque distribuído sequer foi tentado, visto que as novas correções lançadas no BIND impedem que ele aconteça.
-
-
+\chapter{Sequenciadores}
+\chapter{Sequenciadores de Primeira Geração}
+
+\chapter{Sequenciadores de Segunda Geração}
+
+\chapter{O Problema da Montagem}
+\section{Estratégia do Consenso de Sobreposições}
+Os sequenciadores conseguem ler apenas um número limitado de bases, esse
+número limitado de bases é chamado de leitura. A leitura é um pedaço do
+DNA que está sendo sequenciado, contudo a sua posição original é
+desconhecida. Essas leituras são comparadas entre si e organizadas para
+tentar criar uma sequencia única. A sequencia criada através da
+comparação entre as leituras é chamada de contig. Uma forma de comparar
+as leituras é através de suas sobreposições. Através das sobreposições
+monta-se um grafo em que cada vértice é uma leitura e cada vértice está
+conectado a outro se existir uma sobreposição[pevzner]. O problema de
+montagem é então modelado para o problema do Caminho Hamiltoniano, onde
+cada vértice precisa ser visitado uma única vez.
+
+\section{Dificuldades do Consenso de Sobreposições}
+O problema do Caminho Hamiltoniado é NP-Completo e não existem
+algoritmos eficientes para resolvê-lo. Contudo alguns programas utilizam
+essa estratégia para a montagem dos fragmentos como o PHRAP, CAP, TIGR e
+CELERA. Esses programas contudo só conseguem realizar a montagem para
+sequenciadores de primeira geração onde o número de leituras era menor
+que 10 mil, e cada leitura possuia entre 400bp e 900bp. Sequenciadores de
+segunda geração geram facilmente mais de 10 milhões de leituras onde
+cada leitura possui entre 35bp até 50bp no ABI Solid. Devido ao grande
+aumento no número de leituras esses programas não conseguem tratar em
+tempo hábil o problema devido a natureza exponencial da estratégia da montagem.
+%https://products.appliedbiosystems.com/ab/en/US/adirect/ab?cmd=catNavigate2&catID=600530&tab=DetailInfo
+
+\section{Grafo de Bruijn Teórico}
+
+
+
+\chapter{O montador Velvet}
+\section{K-mers}
+
+\section{Grafo de Bruijn}
+
+
+\chapter{Implementação Enxuta dos Reads}
+
+\chapter{Resultados}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Modelo para escrever TCCs, dissertações e teses utilizando LaTeX, ABNTeX e BibTeX
