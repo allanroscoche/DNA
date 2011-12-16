@@ -7,14 +7,35 @@ seres vivos, onde técnicas cada vez mais sofisticadas de computação vem
 sendo utilizadas para superar esse desafio.
 
 \section{Motivação}
-- Os programas como o Velvet necessitam de quantidades grandes de memória, acima de 4Gb para bactérias com 10b. Sendo que apenas computadores de grande porte conseguem atendem as necessidades do software. Estudar as possibilidades de economia de memória para que seja possível fazer o sequenciamento de seres maiores nas máquinas atuais.
+Com o desenvolvimento de novos sequenciadores capazes de gerar vários
+gigabytes de dados em algumas horas, os softwares necessitam cada vez
+mais de sofisticações para conseguir lidar com esses dados. Vários
+montadores foram criados para conseguir mostrar resultados em tempo
+hábil, contudo máquinas cada vez mais poderosas são necessárias.
+Montadores como o Velvet necessitam de quantidades cada vez maiores de
+memória. Sendo que apenas computadores de grande porte conseguem atendem
+as necessidades do software. Estudar as possibilidades de economia de
+memória para que seja possível fazer o sequenciamento de seres maiores
+nas máquinas atuais e a capacidade de fácil distribuição do trabalho
+para que vários processadores possam trabalhar ao mesmo tempo.
 
 \section{Objetivos}
+O objetivo do projeto foi criar alguma modificação na criação da tabela
+hash do velvet, de uma maneira que ela utilizasse menos memória e que
+pudesse ser criada paralelamente de uma forma eficiente.
 
 \section{Organização do Trabalho}
+O capítulo 2 trata dos sequenciadores genéticos e como eles geram o
+problema computacional da montagem, támbém realiza uma perspectiva
+histórica de como o sequenciamento vem evoluindo. Já o capítulo 3 trata
+do problema da montagem de uma forma geral e qual a complexidade
+computacional para tratá-lo. O capítulo 4 trata o velvet e como ele
+trata do problema da montagem. O capíutlo 5 mostra como foram
+implementadas as alterações na tabela hash e como foi realizada a
+paralelização. O capítulo 6 mostra os resultados obtidos.
 
 \chapter{Sequenciadores}
-\section{Sequenciadores de Primeira Geração}
+\section{Sequenciadores Clássicos}
 \subsection{Sequenciamento Dirigido}
 O método mais comum de sequenciamento dirigido é o primer walking. Esse
 método consiste em identificar uma sequência conhecida, e a partir dela
@@ -33,8 +54,21 @@ chamdas de contigs. A combinação de todos os contigs então é realizada
 para descobrir o DNA completo do organismo, normalmente técnicas de
 sequenciamento dirigido é realizado para sequenciar as partes faltantes.
 
-\section{Sequenciadoes de Segunda Geração}
-\section{Sequenciamento Denovo}
+\section{Sequenciadores de Nova Geração}
+Três plataformas para o sequenciamento massivamente paralelo como o
+Roche/454 FLX, o Illumina/Solexa Genome Analizer e o Applied Biosystems
+SOLiD System. Esses instrumentos permitem uma grande simplificação no
+processo de preparação do sequenciamento do DNA, o que economiza tempo e
+um requerimento menor assossiado aos equipamentos muito automatizados,
+com muitos passos e baseados em clonagem. Por métodos diferentes, cada
+tecnologia procura amplificar cada fita dos fragmentos de amostra e
+realiza várias reações nelas.
+Uma outra diferença das novas plataformas é a diferença do tempo
+necessário para a geração dos dados. Os sequenciadores clássicos
+necessivam de tempos entre 8 horas e 10 dias.
+O rendimento dos dados dos experimentos também mudaram drasticamente, ao
+ínvés de 96 leituras com até 750bp cada. Os novos sequenciadores variam
+entre centenas de milhares de leituras até 10 milhões de leituras.
 
 
 \chapter{O Problema da Montagem}
