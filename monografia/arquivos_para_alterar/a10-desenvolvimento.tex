@@ -1,7 +1,10 @@
 \chapter{Introdução}
-- A tecnologia de sequenciamento genético vem evoluindo muito.
-- Sanger, 800bp -> humano
-- SGS(Second Generation Sequencing) 35bp-400bp
+Um pré-requisito para a compreensão completa da biologia de um organismo
+é determinar toda a sua sequência genética. Agora nesse momento, há
+vários projetos de sequenciamento genético em andamento para vários
+organismos. Uma grande parte desses projetos é a montagem do DNA desses
+seres vivos, onde técnicas cada vez mais sofisticadas de computação vem
+sendo utilizadas para superar esse desafio.
 
 \section{Motivação}
 - Os programas como o Velvet necessitam de quantidades grandes de memória, acima de 4Gb para bactérias com 10b. Sendo que apenas computadores de grande porte conseguem atendem as necessidades do software. Estudar as possibilidades de economia de memória para que seja possível fazer o sequenciamento de seres maiores nas máquinas atuais.
@@ -12,6 +15,23 @@
 
 \chapter{Sequenciadores}
 \section{Sequenciadores de Primeira Geração}
+\subsection{Sequenciamento Dirigido}
+O método mais comum de sequenciamento dirigido é o primer walking. Esse
+método consiste em identificar uma sequência conhecida, e a partir dela
+ler a sequencia adjacente. Essa nova sequência então é utilizado para
+identificar a próxima leitura e então uma nova sequencia adjacente é
+gerada.. Dessa maneira ``anda-se'' por toda a sequência e o cromossomo é
+lido do começo ao fim. O principal problema  do sequenciamento dirigido
+é dele ser sequencial e extremamente lento.
+\subsection{Sequenciamento Aleatório}
+A estratégia shotgun para o sequenciamento genético de todo organismo
+consiste em quebrar o DNA em segmentos de vários tamanhos e então clonar
+esses segmentos em vetores. Esses segmentos então são sequenciados e
+várias leituras aleatórias do organismo são geradas. Essas leituras
+então são comparadas e montadas, gerando assim várias sequências maiores
+chamdas de contigs. A combinação de todos os contigs então é realizada
+para descobrir o DNA completo do organismo, normalmente técnicas de
+sequenciamento dirigido é realizado para sequenciar as partes faltantes.
 
 \section{Sequenciadoes de Segunda Geração}
 \section{Sequenciamento Denovo}
@@ -72,11 +92,33 @@ arcos são mapenado como ``caminhos'' atravessando o grafo.[velvet]
 
 \section{Grafo de Bruijn}
 É realizado uma hash das leituras de acordo com o tamanho definido pelos
-k-mers. 
+k-mers. A variável k é limitada pelo tamanho da leitura sendo
+utilizada. K-mers pequenos aumentam a conectividade do grapo ao mesmo
+tempo aumentam a chance de repetições ambíguas no grafo. Logo é
+necessário um equilibrio entre sensibilidade e especificidade
+determinado pelo k(cf. Methods).
+Para cada k-mers encontrado no conjunto de leituras, a tabela hash
+armazena o ID da primeira leitura encontrada para aquele k-mer e a sua
+posição encontrada dentro da leitura. Cada k-mer é armazenado
+simultaneamente com o seu complemento reverso. Para garantir que cada
+k-mer não possa ser o seu próprio complemento reverso, k tem que ser um
+número impar. Essa primeira leitura permite que cada leitura seja
+reescrita como um conjunto de k-mers combinados com suas sobreposições
+na tabela hash. Essa representação de leituras é chamada de ``roadmap''
+e é o foco do trabalho realizado.
 
 
 \section{Remoção de Erros}
-
+A correção de erros é realizada depois que o grafo é formado para que
+seja possível operações simultâneas no conjunto de leituras. Uma
+abordagem simplista seria remover todos os nós com cobertura baixa,
+contudo isso também eliminaria variações biológicas legítimas que tenham
+uma representação baixa. O Velvet utiliza métodos que focam
+características topológicas. Informações errôneas geram três tipos de
+estruturas: ``tips'' em função dos erros nos arcos do reads, ``bulges''
+devido a leituras erradas ou a ``tips'' próximas que estejam conectadas,
+e conexões erradas devido a defeitos de clonagem. Os três erros são
+removidos consecutivamente.
 
 %\chapter{Falha de segurança no DNS}
 %Em Julho de 2008 foi anunciado pelo \textit{CERT} (\textit{Computer Emergency Readiness Team} -- Time de prontidão a emergências computacionais) que o pesquisador de segurança Dan Kaminsky havia descoberto uma falha fundamental no protocolo do DNS, definido nos RFC's 1034 \cite{rfc1034} e 1035 \cite{rfc1035}.
@@ -95,7 +137,8 @@ tabanho do vetor e qual a posição de término do ultimo nucleotídio da
 ultima posição do vetor.
 
 \section{Busca de sobreposições}
-A busca das sobreposições é realizada comparando bloco a bloco as sequências.
+A busca das sobreposições é realizada comparando bloco a bloco as
+sequências. Ao invés de k-1 pares adjacentes, as sequencias são ligadas comparadando
 
 \chapter{Resultados}
 
