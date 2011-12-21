@@ -67,33 +67,62 @@ Uma outra diferença das novas plataformas é a diferença do tempo
 necessário para a geração dos dados. Os sequenciadores clássicos
 necessivam de tempos entre 8 horas e 10 dias.
 O rendimento dos dados dos experimentos também mudaram drasticamente, ao
-ínvés de 96 leituras com até 750bp cada. Os novos sequenciadores variam
+ínvés de 96 leituras com até 750 nucleotídios cada. Os novos sequenciadores variam
 entre centenas de milhares de leituras até 10 milhões de leituras.
 
+\section{Sequenciamento De Novo}
+Inicialmente esses sequenciadores eram utilizados para sequenciar o
+código genético de organismos já conhecidos. As leituras eram mapeadas
+para um ``esqueleto'' já conhecido e através dele era montado o novo
+código genético. Sequenciar o código genético de um organismo que ainda
+não foi sequenciado, ou seja, em que não existe um ``esqueleto'' é
+conhecido como sequenciamento De novo.
+Uma das grandes dificuldades para realizar um sequenciamento de novo com
+os sequenciadores de nova geração é o grande aumento no número de
+leituras. Muitos softwares de montagem utilizados nos sequencidores
+clássicos eram incapazes de trabalhar com esse novos dados. Novos montadores
+foram criados para conseguir realizar um sequenciamento de novo com os
+sequenciadores de nova geração.
 
 \chapter{O Problema da Montagem}
-\section{Estratégia do Consenso de Sobreposições}
+\section{Conceito Inicial}
+
 Os sequenciadores conseguem ler apenas um número limitado de bases, esse
-número limitado de bases é chamado de leitura. A leitura é um pedaço do
-DNA que está sendo sequenciado, contudo a sua posição original é
-desconhecida. Essas leituras são comparadas entre si e organizadas para
-tentar criar uma sequencia única. A sequencia criada através da
-comparação e junção entre diversas leituras é chamada de contig. As
-leituras podem ser comparadas através de suas sobreposições, com elas
+número limitado de bases é chamado de leitura. No sequenciamento
+aleatório a posição da leitura é desconhecido e,  para descobrir a sua
+posição, as leituras são comparadas entre si e organizadas para tentar
+criar uma sequencia única. Nos sequenciadores clássicos as leituras
+variavam normalmente entre 500 e 800 bp. Todas essas leituras devem ser
+então ``encaixadas'' para se obter o código genético completo do
+organismo. Para que as leituras sejam ``encaixadas'' é utilizado a
+sobreposição de regiões repetidas nas leituras, como por exemplo
+
+
+\section{Estratégia do Consenso de Sobreposições}
+As leituras podem ser comparadas através de suas sobreposições, com elas
 monta-se um grafo em que cada vértice é uma leitura e cada aresta
-se existir uma sobreposição[pevzner] entre as leituras. O problema de
+se existir uma sobreposição[pevzner] entre elas. A comparação entre
+duas leituras é realizada utilizado o algoritmo de Smith e Waterman. O
+algoritmo encontra a melhor sobreposição possível, com essa sobreposição é
+dado um peso a aresta correspondente as duas leituras. O problema de
 montagem é então modelado para o problema do Caminho Hamiltoniano, onde
-cada vértice precisa ser visitado uma única vez.
+cada vértice precisa ser visitado uma única vez. Utilizando esse caminho
+e as sobreposições encontradas é montado uma sequencia única chamada de
+contig. O grafo gerado não é necessariamente conexo, e para cada
+componente conexa é gerada um contig. Após a primeira montagem podem ser
+realizados novos sequenciamentos aleatórios para tentar montar um grafo
+conexo ou sequenciamentos dirigidos podem ser utilizados para ``unir''
+os contigs gerados.
 
 \section{Dificuldades do Consenso de Sobreposições}
 O problema do Caminho Hamiltoniado é NP-Completo e não existem
 algoritmos eficientes para resolvê-lo. Contudo alguns programas utilizam
 essa estratégia para a montagem dos fragmentos como o PHRAP, CAP, TIGR e
 CELERA. Esses programas contudo só conseguem realizar a montagem para
-sequenciadores de primeira geração onde o número de leituras era menor
-que 10 mil, e cada leitura possuia entre 400bp e 900bp. Sequenciadores de
-segunda geração geram facilmente mais de 10 milhões de leituras onde
-cada leitura possui entre 35bp até 50bp no ABI Solid. Devido ao grande
+sequenciadores de primeira geração onde o número de leituras eram perto
+de 100 e cada leitura possuia entre 400bp e 900bp. Sequenciadores de
+segunda geração como o ABI Solid geram em torno de 10 milhões leituras onde
+cada leitura possui entre 35bp até 50bp. Devido ao grande
 aumento no número de leituras esses programas não conseguem tratar em
 tempo hábil o problema devido a natureza exponencial da estratégia da montagem.
 %https://products.appliedbiosystems.com/ab/en/US/adirect/ab?cmd=catNavigate2&catID=600530&tab=DetailInfo
@@ -166,13 +195,15 @@ base, num total de 4 nucleotídeos por byte. Utilizando 4 vezes menos
 memória do que armazenar um nucleotídio por byte, formando um bloco com
 4 bases.
 Cada sequencia é armazenada com um vetor de tamanho n, onde o número de
-nucleotídios é menor que 4n. Dentro da estrutura de é armazenado o
+nucleotídios é no máximo 4n. Dentro da estrutura é armazenado o
 tabanho do vetor e qual a posição de término do ultimo nucleotídio da
 ultima posição do vetor.
 
 \section{Busca de sobreposições}
 A busca das sobreposições é realizada comparando bloco a bloco as
-sequências. Ao invés de k-1 pares adjacentes, as sequencias são ligadas comparadando
+sequências. Ao invés de k-1 pares adjacentes, as sequencias são ligadas
+comparando bloco a bloco até que uma quantidade mínima de blocos seja
+igual. 
 
 \chapter{Resultados}
 
