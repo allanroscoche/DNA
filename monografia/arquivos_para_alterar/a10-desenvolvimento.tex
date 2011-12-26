@@ -2,8 +2,8 @@
 Um pré-requisito para a compreensão completa da biologia de um organismo
 é determinar toda a sua sequência genética. Agora nesse momento, há
 vários projetos de sequenciamento genético em andamento para vários
-organismos. Uma grande parte desses projetos é a montagem do DNA desses
-seres vivos, onde técnicas cada vez mais sofisticadas de computação vem
+organismos. Uma parte importante desses projetos é a montagem das partes do
+DNA desses seres vivos, onde técnicas cada vez mais sofisticadas de computação vem
 sendo utilizadas para superar esse desafio.
 
 \section{Motivação}
@@ -34,8 +34,8 @@ trata do problema da montagem. O capíutlo 5 mostra como foram
 implementadas as alterações na tabela hash e como foi realizada a
 paralelização. O capítulo 6 mostra os resultados obtidos.
 
-\chapter{Sequenciadores}
-\section{Sequenciadores Clássicos}
+\chapter{Sequenciamento}
+\section{Sequenciamento Tradicional}
 \subsection{Sequenciamento Dirigido}
 O método mais comum de sequenciamento dirigido é o primer walking. Esse
 método consiste em identificar uma sequência conhecida, e a partir dela
@@ -70,6 +70,8 @@ O rendimento dos dados dos experimentos também mudaram drasticamente, ao
 ínvés de 96 leituras com até 750 nucleotídios cada. Os novos sequenciadores variam
 entre centenas de milhares de leituras até 10 milhões de leituras.
 
+\subsection{Sequeciamento com Referência}
+
 \section{Sequenciamento De Novo}
 Inicialmente esses sequenciadores eram utilizados para sequenciar o
 código genético de organismos já conhecidos. As leituras eram mapeadas
@@ -84,9 +86,12 @@ clássicos eram incapazes de trabalhar com esse novos dados. Novos montadores
 foram criados para conseguir realizar um sequenciamento de novo com os
 sequenciadores de nova geração.
 
-\chapter{O Problema da Montagem}
-\section{Conceito Inicial}
+\subsection{ABI Solid}
 
+
+\chapter{Montagem}
+
+\section{Montagem Tradicional}
 Os sequenciadores conseguem ler apenas um número limitado de bases, esse
 número limitado de bases é chamado de leitura. No sequenciamento
 aleatório a posição da leitura é desconhecido e,  para descobrir a sua
@@ -97,8 +102,9 @@ então ``encaixadas'' para se obter o código genético completo do
 organismo. Para que as leituras sejam ``encaixadas'' é utilizado a
 sobreposição de regiões repetidas nas leituras, como por exemplo
 
-
-\section{Estratégia do Consenso de Sobreposições}
+\subsection{Detecção da Sobreposição}
+\subsection{Layout de Fragmentos}
+\subsection{Decisão da Sequência Consenso}
 As leituras podem ser comparadas através de suas sobreposições, com elas
 monta-se um grafo em que cada vértice é uma leitura e cada aresta
 se existir uma sobreposição[pevzner] entre elas. A comparação entre
@@ -114,7 +120,7 @@ realizados novos sequenciamentos aleatórios para tentar montar um grafo
 conexo ou sequenciamentos dirigidos podem ser utilizados para ``unir''
 os contigs gerados.
 
-\section{Dificuldades do Consenso de Sobreposições}
+\subsection{Problemas Existentes}
 O problema do Caminho Hamiltoniado é NP-Completo e não existem
 algoritmos eficientes para resolvê-lo. Contudo alguns programas utilizam
 essa estratégia para a montagem dos fragmentos como o PHRAP, CAP, TIGR e
@@ -127,7 +133,12 @@ aumento no número de leituras esses programas não conseguem tratar em
 tempo hábil o problema devido a natureza exponencial da estratégia da montagem.
 %https://products.appliedbiosystems.com/ab/en/US/adirect/ab?cmd=catNavigate2&catID=600530&tab=DetailInfo
 
-\section{Grafo de Bruijn Teórico}
+
+\section{Montagem Atual}
+
+\subsection{``Grude'' ou K-mers}
+
+\section{Grafo de Bruijn}
 O grafo de Bruijn é montado criando vértices que são partes repetidas de
 leituras, ou seja, as leituras são unidas. Dessa maneira, cada repetição
 corresponde a uma aresta ao invés de uma coleção de vértices no grafo
@@ -142,9 +153,20 @@ de construí-lo. Os vértices criados através de leituras unidas necessita
 do conhecimento do DNA completo, que não está disponível até a fase
 final.
 
+\subsection{Caminho Euleriano}
+\subsection{Supercaminho Euleriano}
+\subsection{Remoção de Erros}
+\subsection{Problemas}
+
 \chapter{O montador Velvet}
 
-\section{K-mers}
+\section{Fases da Montagem}
+O velvet é dividido em 2 executáveis, o velveth e velvetg, respectivamente
+aquele que cria a tabela hash e o outro que cria o grafo. O trabalho foi focado
+na primeira parte do programa, onde mudanças são propostas para tentar melhorar
+a utilização de memória, paralização e tempo de execução. 
+
+\section{Tabela de K-mers}
 Os k-mers são os vértices do grafo de Bruijn no Velvet. Os k-mers são
 formados por k-1 bases adjacentes. Cada nó é unido ao seu inverso,
 que representa a ordem inversa do seu complemento dos nucleotídios. A
@@ -152,6 +174,11 @@ união do nó com seu inverso é chamado bloco. Cada bloco tem dois lados
 distintos, cada lado é ligado por um ``arco'' direcionado. Contudo se um
 arco vai de A pra B, um arco simétrico vai de /B pra /A. Os nós e os
 arcos são mapenado como ``caminhos'' atravessando o grafo.[velvet]
+
+\subsection{Tabela de Reads}
+\subsection{Criação dos K-mers}
+\subsection{Criação do RoadMap}
+
 
 \section{Grafo de Bruijn}
 É realizado uma hash das leituras de acordo com o tamanho definido pelos
@@ -170,8 +197,9 @@ reescrita como um conjunto de k-mers combinados com suas sobreposições
 na tabela hash. Essa representação de leituras é chamada de ``roadmap''
 e é o foco do trabalho realizado.
 
+\subsection{Criação do Grafo}
 
-\section{Remoção de Erros}
+\subsection{Remoção de Erros}
 A correção de erros é realizada depois que o grafo é formado para que
 seja possível operações simultâneas no conjunto de leituras. Uma
 abordagem simplista seria remover todos os nós com cobertura baixa,
@@ -183,11 +211,14 @@ devido a leituras erradas ou a ``tips'' próximas que estejam conectadas,
 e conexões erradas devido a defeitos de clonagem. Os três erros são
 removidos consecutivamente.
 
+\subsection{Supercaminho Euleriano}
+
 %\chapter{Falha de segurança no DNS}
 %Em Julho de 2008 foi anunciado pelo \textit{CERT} (\textit{Computer Emergency Readiness Team} -- Time de prontidão a emergências computacionais) que o pesquisador de segurança Dan Kaminsky havia descoberto uma falha fundamental no protocolo do DNS, definido nos RFC's 1034 \cite{rfc1034} e 1035 \cite{rfc1035}.
 
 
-\chapter{Nova proposta da montagem dos k-mers}
+\chapter{Implementações e Mudanças Realizadas no Velvet}
+
 \section{Implementação Enxuta dos Reads}
 A implementação das leituras é realizada de uma forma a economizar o
 máximo de memória. Cada base de uma leitura utiliza apenas 2 bits por
@@ -199,13 +230,13 @@ nucleotídios é no máximo 4n. Dentro da estrutura é armazenado o
 tabanho do vetor e qual a posição de término do ultimo nucleotídio da
 ultima posição do vetor.
 
-\section{Busca de sobreposições}
+\section{Criação de K-mers reduzida}
 A busca das sobreposições é realizada comparando bloco a bloco as
 sequências. Ao invés de k-1 pares adjacentes, as sequencias são ligadas
 comparando bloco a bloco até que uma quantidade mínima de blocos seja
 igual. 
 
-\chapter{Resultados}
+\section{Resultados}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Modelo para escrever TCCs, dissertações e teses utilizando LaTeX, ABNTeX e BibTeX
