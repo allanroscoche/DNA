@@ -36,15 +36,28 @@ paralelização. O capítulo 6 mostra os resultados obtidos.
 
 \chapter{Sequenciamento}
 \section{Sequenciamento Tradicional}
+
+
 \subsection{Sequenciamento Dirigido}
+% www.elsevier.com/locate/jbiotec
+% DOE92
+% GUS97
+% 20 linhas - 7
 O método mais comum de sequenciamento dirigido é o primer walking. Esse
 método consiste em identificar uma sequência conhecida, e a partir dela
 ler a sequencia adjacente. Essa nova sequência então é utilizado para
-identificar a próxima leitura e então uma nova sequencia adjacente é
-gerada.. Dessa maneira ``anda-se'' por toda a sequência e o cromossomo é
+identificar a próxima leitura e então uma nova sequencia é
+gerada. Dessa maneira ``anda-se'' por toda a sequência e o cromossomo é
 lido do começo ao fim. O principal problema  do sequenciamento dirigido
 é dele ser sequencial e extremamente lento.
+
 \subsection{Sequenciamento Aleatório}
+% MW96
+% Mye99
+% WM97
+% Gre97
+% Ms94
+% 20 linhas - 8
 A estratégia shotgun para o sequenciamento genético de todo organismo
 consiste em quebrar o DNA em segmentos de vários tamanhos e então clonar
 esses segmentos em vetores. Esses segmentos então são sequenciados e
@@ -55,6 +68,7 @@ para descobrir o DNA completo do organismo, normalmente técnicas de
 sequenciamento dirigido é realizado para sequenciar as partes faltantes.
 
 \section{Sequenciadores de Nova Geração}
+% 20 linhas - 14
 Três plataformas para o sequenciamento massivamente paralelo como o
 Roche/454 FLX, o Illumina/Solexa Genome Analizer e o Applied Biosystems
 SOLiD System. Esses instrumentos permitem uma grande simplificação no
@@ -72,7 +86,7 @@ entre centenas de milhares de leituras até 10 milhões de leituras.
 
 \subsection{Sequeciamento com Referência}
 
-\section{Sequenciamento De Novo}
+\subsection{Sequenciamento De Novo}
 Inicialmente esses sequenciadores eram utilizados para sequenciar o
 código genético de organismos já conhecidos. As leituras eram mapeadas
 para um ``esqueleto'' já conhecido e através dele era montado o novo
@@ -92,6 +106,8 @@ sequenciadores de nova geração.
 \chapter{Montagem}
 
 \section{Montagem Tradicional}
+%
+%
 Os sequenciadores conseguem ler apenas um número limitado de bases, esse
 número limitado de bases é chamado de leitura. No sequenciamento
 aleatório a posição da leitura é desconhecido e,  para descobrir a sua
