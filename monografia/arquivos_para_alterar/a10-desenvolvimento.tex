@@ -36,6 +36,22 @@ paralelização. O capítulo 6 mostra os resultados obtidos.
 
 \chapter{Sequenciamento}
 \section{Sequenciamento Tradicional}
+O sequenciamento consiste em se conseguir ``ler'' ou ``descobrir'' em que
+ordem as bases nucléicas A,C,G,T se encontram no código genético de um organismo.
+Para se conseguir ``ler'' essas bases vários métodos químicos são utilizados para
+descobrir qual base está em que posição do código genético. Compostos químicos complementares
+são misturados a solução com o DNA a ser sequenciado, em uns dos métodos átomos radioativos
+eram utilizados para marcar cada base, e depois uma espécie de radiografia da sequencia era realizada.
+A partir dessa idéia foram adicionados aos compostos complementares corantes fluorecentes, esses corantes
+ao serem excitados com laser produziam uma intensidade de onde dependendo da base presente.
+Com essa imagem, uma análise era feita das intensidade das cores para determinar a sequencia lida.
+Um dos grandes problemas nesse método é distinguir a quantidade de n marcas consecutivas e qualidade
+das ``fotografias'' geradas, por isso várias cópias eram geradas e sequenciadas.
+Essas ``fotografias'' tiradas do código genético não são completas, ou seja, não contém todo o código genético
+e sim uma parte dele. Uma comparação possível seria como tirar uma foto de um texto, há um compromisso entre
+tamanho e qualidade, é possível fotografar todo o texto com uma qualidade pequena, imposibilitando a identificação
+das letras, ou fotografar parágrafo por parágrafo, e a partir deles montar o texto completo. Tendo isso em vista
+podemos analizar as duas formas tradicionais de sequenciamento.
 
 
 \subsection{Sequenciamento Dirigido}
@@ -48,8 +64,14 @@ método consiste em identificar uma sequência conhecida, e a partir dela
 ler a sequencia adjacente. Essa nova sequência então é utilizado para
 identificar a próxima leitura e então uma nova sequencia é
 gerada. Dessa maneira ``anda-se'' por toda a sequência e o cromossomo é
-lido do começo ao fim. O principal problema  do sequenciamento dirigido
-é dele ser sequencial e extremamente lento.
+lido do começo ao fim.
+Apesar da simplicidade teórica do método, a sua implementação é muito difícil e de custo alto.
+Admitindo que uma sequencia já é conhecida, para conseguirmos a próxima sequencia é necessário
+gerar um composto químico que ``encaixe'' com a parte final da sequencia conhecida para então
+obter a continuação da sequencia. Alguns desses compostos químicos para ``encaixe'' poderiam difíceis
+de serem produzidos, os tornando muitos caros, ou até mesmo raramente utilizados elevando o seu preço 
+de produção. Aliado isso ao fato de que só era possível iniciar o sequenciamento de um fragmento depois
+que outro já estivesse completo, torna esse método muito mais lendo que o sequenciamento aleatório.
 
 \subsection{Sequenciamento Aleatório}
 % MW96
@@ -58,14 +80,20 @@ lido do começo ao fim. O principal problema  do sequenciamento dirigido
 % Gre97
 % Ms94
 % 20 linhas - 8
-A estratégia shotgun para o sequenciamento genético de todo organismo
-consiste em quebrar o DNA em segmentos de vários tamanhos e então clonar
+A estratégia shotgun para o sequenciamento genético consiste em quebrar
+ o DNA em segmentos de vários tamanhos e então clonar
 esses segmentos em vetores. Esses segmentos então são sequenciados e
 várias leituras aleatórias do organismo são geradas. Essas leituras
 então são comparadas e montadas, gerando assim várias sequências maiores
-chamdas de contigs. A combinação de todos os contigs então é realizada
+chamadas de contigs. A combinação de todos os contigs então é realizada
 para descobrir o DNA completo do organismo, normalmente técnicas de
 sequenciamento dirigido é realizado para sequenciar as partes faltantes.
+Uma das grandes vantages do sequenciamento aleatório sobre o dirigido é a
+possibilidade de sequenciar várias partes do DNA ao mesmo tempo, sem a necessidade
+de utilizar compostos para ``encaixar'' em algum ponto da sequencia. Assim, o trabalho
+de ``montar'' o código genético completo não é mais realizado totalmente no
+sequenciamento e sim através da utilização de softwares para ``montar'' ou
+``encaixar'' esses fragmentos sequenciados.
 
 \section{Sequenciadores de Nova Geração}
 % 20 linhas - 14
@@ -88,6 +116,14 @@ entre centenas de milhares de leituras até 10 milhões de leituras.
 
 
 \subsection{Sequeciamento com Referência}
+No sequenciamento com referencia algum organismo da mesma espécie já foi
+sequenciado, e através dele, as leituras são mapeadas para esse organismo
+``exemplo''. O objetivo é encontrar as diferenças entre o organismo exemplo
+e aquele em que está sendo sequenciado. O trabalho computacional concentra-se
+apenas em comparar as sequencias lidas ao exemplo, e marcar o local onde 
+os melhores encaixes são obtidos. Assim as bases nas leituras que não correspondem
+ao código exemplo seriam a diferença entre os 2 organismos.
+
 
 \subsection{Sequenciamento De Novo}
 Inicialmente esses sequenciadores eram utilizados para sequenciar o
@@ -104,6 +140,7 @@ foram criados para conseguir realizar um sequenciamento de novo com os
 sequenciadores de nova geração.
 
 \subsection{ABI Solid}
+
 
 
 \chapter{Montagem}
@@ -157,7 +194,7 @@ tempo hábil o problema devido a natureza exponencial da estratégia da montagem.
 
 \subsection{``Grude'' ou K-mers}
 
-\section{Grafo de Bruijn}
+\subsection{Grafo de Bruijn}
 O grafo de Bruijn é montado criando vértices que são partes repetidas de
 leituras, ou seja, as leituras são unidas. Dessa maneira, cada repetição
 corresponde a uma aresta ao invés de uma coleção de vértices no grafo
