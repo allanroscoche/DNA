@@ -139,8 +139,6 @@ clássicos eram incapazes de trabalhar com esse novos dados. Novos montadores
 foram criados para conseguir realizar um sequenciamento de novo com os
 sequenciadores de nova geração.
 
-\subsection{ABI Solid}
-
 
 
 \chapter{Montagem}
@@ -234,17 +232,27 @@ final.
 O problema do Supercaminho euleriano é definido como "Dado um grafo de Bruijn e uma colação de caminhos neste grafo,
  encontre um caminho Euleriano neste grafo que contenha todos estes caminhos como subcaminhos".
  Dada uma coleção de reads (cadeias) S={s1, s2, ..., sn} de um projeto de sequenciamento e um inteiro l,
- o spectrum de S é o conjunto Sl de todas as l-tuplas dos reads s1, s2, ..., sn. 
-Uma (l-1)-tupla v E Sl-1 é ligado por uma aresta direcionada com (l-1)tupla w E Sl-1, 
+ o spectrum de S é o conjunto Sl de todas as l-tuplas dos reads s1, s2, ..., sn.
+Uma (l-1)-tupla v E Sl-1 é ligado por uma aresta direcionada com (l-1)tupla w E Sl-1,
 se Sl contém uma l-tupla onde os primeiros l-1 nucleotídeos coincidem com os ultismos l-1 nucleotídeos de w.
  Cada l-tupla de Sl corresponde a uma aresta no grafo. Se S contem apenas uma sequencia S1 then essa sequencia
  corresponde a um caminho visitando cada aresta uma vez, esse problema é intimimamente relacionado ao problema
  de encontrar o caminho visitando cada aresta do grafo apenas uma vez, um problema do caminho euleriano.
  Nós podemos transformar o problema num caminho euleriano introduzindo multiplicidades
 nas arestas do grafo de bruijn.
-\subsection{Remoção de Erros}
 
-\subsection{Problemas}
+
+\subsection{Remoção de Erros}
+Uma abordagem gulosa para o problema da correção de erros seria olhar
+para correções em leituras que dimínuíssem o tabalho Sl por 2l. Esse
+procedimento simples já elimina 86.5\% dos erros nas
+sequencias[pevzner]. Um dos fatos importantes nessa fase não é somente
+tentar corrigir alguns erros, mas também simplificar o grafo de
+bruijn. Dessa maneira poderíamos retirar arestas faltas no grafo e
+tratar desse problema depois que ele estiver pronto. Uma maneira fácil
+de corrigir esses problemas depois seria utilizar uma variação do
+algoritmo de Churchill-Waterman(23) para reconstruir os nucleotídeos duvidosos.
+
 
 \chapter{O montador Velvet}
 
@@ -252,7 +260,7 @@ nas arestas do grafo de bruijn.
 O velvet é dividido em 2 executáveis, o velveth e velvetg, respectivamente
 aquele que cria a tabela hash e o outro que cria o grafo. O trabalho foi focado
 na primeira parte do programa, onde mudanças são propostas para tentar melhorar
-a utilização de memória, paralização e tempo de execução. 
+a utilização de memória, paralização e tempo de execução.
 
 \section{Tabela de K-mers}
 Os k-mers são os vértices do grafo de Bruijn no Velvet. Os k-mers são
@@ -264,6 +272,8 @@ arco vai de A pra B, um arco simétrico vai de /B pra /A. Os nós e os
 arcos são mapenado como ``caminhos'' atravessando o grafo.[velvet]
 
 \subsection{Tabela de Reads}
+
+
 \subsection{Criação dos K-mers}
 \subsection{Criação do RoadMap}
 
@@ -306,6 +316,17 @@ removidos consecutivamente.
 
 
 \chapter{Implementações e Mudanças Realizadas no Velvet}
+
+\section{Utilização de uma Arvore de prefixos}
+Uma das primeiras implementações testadas foi uma árvore de prefixos com
+o objetivo de diminuir o tempo para encontrar o nó com l-1 bases
+adjacentes. Nos experimentos realizados, para um número pequeno de
+leituras o tempo para encontrar o nó adjacente foi pequeno, dependendo
+apenas do tamanho da árvore, contundo, a quantidade de memória
+necessária para armazenar essa árvore foi muito grande, considerando que
+cada base ou conjunto de bases poderia criar um ponteiro na árvore, ela
+crescia aproximadamente um valor exponencial ao tamanho de cada leitura,
+a tornando inviável para a maioria das aplicações.
 
 \section{Implementação Enxuta dos Reads}
 A implementação das leituras é realizada de uma forma a economizar o
