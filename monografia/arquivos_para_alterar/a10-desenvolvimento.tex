@@ -112,7 +112,7 @@ O rendimento dos dados dos experimentos também mudaram drasticamente, ao
 ínvés de 96 leituras com até 750 nucleotídios cada. Os novos sequenciadores variam
 entre centenas de milhares de leituras até 10 milhões de leituras.
 
-\subsection{Applied Biosystems SOLiD Sequencer}
+%\subsection{Applied Biosystems SOLiD Sequencer}
 
 
 \subsection{Sequeciamento com Referência}
@@ -213,6 +213,17 @@ entre si no código final. Isso é realizado de uma maneira aproximada e
 algoritmos para a correção de erros é utilizada para sanar imperfeições
 na montagem realizadas nessa fase.
 
+
+\begin{figure}[b] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+\begin{center}
+\includegraphics[scale=.4]{./figuras/grude.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
+\end{center}
+\caption[Implementação dos Kmers ou ``grudes'']{Esquema da implementação dos
+  k-mers ou ``grudes'', retirado de \cite{steve}}
+\label{kmer-velvet}
+\end{figure}
+
+
 \subsection{Grafo de Bruijn}
 O grafo de Bruijn é montado criando vértices que são partes repetidas de
 leituras, ou seja, as leituras são unidas. Dessa maneira, cada repetição
@@ -253,29 +264,71 @@ tratar desse problema depois que ele estiver pronto. Uma maneira fácil
 de corrigir esses problemas depois seria utilizar uma variação do
 algoritmo de Churchill-Waterman(23) para reconstruir os nucleotídeos duvidosos.
 
+\begin{figure}[b] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+\begin{center}
+\includegraphics[scale=.5]{./figuras/montagem.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
+\end{center}
+\caption[Exemplos de Monagem]{Ilustrações dos algoritmos de montagem, retirado de \cite{steve}}
+\label{montagens}
+\end{figure}
+
 
 \chapter{O montador Velvet}
 
 \section{Fases da Montagem}
 O velvet é dividido em 2 executáveis, o velveth e velvetg, respectivamente
-aquele que cria a tabela hash e o outro que cria o grafo. O trabalho foi focado
+aquele que cria a tabela hash e o outro que cria o grafo. Na primeira
+parte do programa um conjunto de arquivos chamados de Roadmap são
+gerados para a criação do grafo no velvetg. O trabalho foi focado
 na primeira parte do programa, onde mudanças são propostas para tentar melhorar
 a utilização de memória, paralização e tempo de execução.
 
-\section{Tabela de K-mers}
+\section{Criação dos K-mers}
 Os k-mers são os vértices do grafo de Bruijn no Velvet. Os k-mers são
-formados por k-1 bases adjacentes. Cada nó é unido ao seu inverso,
+formados por k-1 bases adjacentes. Para poder criá-los o velvet
+``corta'' as leituras para o tamanho k, aumentando ainda mais o números
+de leituras iniciais. Isso é feito com o intuito de melhorar a
+sobreposição das leituras e adaptá-las ao tamanho fixo da tabela hash,
+já que alguns formatos de entrada não possuem tamanho fixo. Cada nó é unido ao seu inverso,
 que representa a ordem inversa do seu complemento dos nucleotídios. A
 união do nó com seu inverso é chamado bloco. Cada bloco tem dois lados
 distintos, cada lado é ligado por um ``arco'' direcionado. Contudo se um
 arco vai de A pra B, um arco simétrico vai de /B pra /A. Os nós e os
 arcos são mapenado como ``caminhos'' atravessando o grafo.[velvet]
+Cada k-mer no velvet armazena o seu próprio complemento, mesmo que ele
+não esteja presente nas leituras, ou seja, se existir um k-mer com as
+bases GTA o seu complemento CAT vai ser adicionado reversamente no
+k-mer, isso implica que os k-mers só podem ser ímpares para evitar que
+ele seja o seu próprio complemento.
+
+
+\begin{figure}[b] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+\begin{center}
+\includegraphics[scale=.3]{./figuras/kmer.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
+\end{center}
+\caption[Implementação do Kmer do velvet]{Esquema da implementação do
+  k-mer do velvet, retirado de \cite{steve}}
+\label{kmer-velvet}
+\end{figure}
 
 \subsection{Tabela de Reads}
+Devido a grande quantidade de memória necessária para armazenar os
+reads, o velvet converte todas as suas leituras para um formato
+econômico em memória chamado tightString. Nesse formato de estrutura de
+dados cada unidade de memória(ex: byte, inteiro) armazena mais de uma
+base e um contador armazena a quantidade de bases dessa sequência.
+Contudo, esse formato de memória é apenas utilizado para armazenamento,
+para uma sequencia ser utilizada ela é antes convertida para o formato
+normal, onde cada base utiliza um byte para então ser utilizada nas
+operações como adição, comparação e inversão.
 
-
-\subsection{Criação dos K-mers}
-\subsection{Criação do RoadMap}
+\subsection{Tabela de Ocorrência de K-mers}
+A tabela de Ocorrencia de K-mers é uma tabela hash em que algumas bases
+da primeira sequencia do k-mer é utilizada como chave, tendo assim uma
+boa dispersão. Cada entrada na tabela é composta por uma ocorrência onde
+a estrutura de dados armazena o ID, a posição, o ofsset e o
+kmer. A tabela também possui os ``bits de aceleração'' que organizam as
+chaves afim de melhorar as buscas subsequentes.
 
 
 \section{Grafo de Bruijn}
@@ -292,10 +345,11 @@ simultaneamente com o seu complemento reverso. Para garantir que cada
 k-mer não possa ser o seu próprio complemento reverso, k tem que ser um
 número impar. Essa primeira leitura permite que cada leitura seja
 reescrita como um conjunto de k-mers combinados com suas sobreposições
-na tabela hash. Essa representação de leituras é chamada de ``roadmap''
-e é o foco do trabalho realizado.
-
-\subsection{Criação do Grafo}
+na tabela hash. Essa representação de leituras é chamada de ``roadmap''.
+O ``roadmap'' é utilizado para armazenar os k-mers encontrados e outros
+gerados durante a primeira execução. A partir desses k-mers o grafo de
+bruijn é criado. Cada k-mers representa um vértice no grafo e a cada
+k-mer subsequente é criado uma nova aresta ou é incrementada a já existente.
 
 \subsection{Remoção de Erros}
 A correção de erros é realizada depois que o grafo é formado para que
@@ -307,9 +361,25 @@ características topológicas. Informações errôneas geram três tipos de
 estruturas: ``tips'' em função dos erros nos arcos do reads, ``bulges''
 devido a leituras erradas ou a ``tips'' próximas que estejam conectadas,
 e conexões erradas devido a defeitos de clonagem. Os três erros são
-removidos consecutivamente.
+removidos consecutivamente. Um ``tip'' é uma sequencia de nós em que
+estão desconectados no final, remover esse tipo de situação é uma tarefa
+árdua. Esse tipo de informação pode ser descartada já que apenas
+informações locais são perdidas e nenhuma conectividade é
+comprometida. Contudo algumas restrições devem ser realizadas para
+diferenciar aquelas que são legítimas e aquelas causadas por ``gaps'' no
+sequenciamento, dois fatores são utilizados: tamanho e contagem. Se o
+``tip'' for menor que 2k bases ele é removido, esse tramanho arbitrário
+é utilizado porque ele é maior que o tamanho do k-mer de leituras individuais.
 
-\subsection{Supercaminho Euleriano}
+
+\begin{figure}[b] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+\begin{center}
+\includegraphics[scale=.3]{./figuras/tourbus.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
+\end{center}
+\caption[Correção de erros no velvet]{Esquema da correção de bolhas no velvet, retirado de \cite{steve}}
+\label{erros-velvet}
+\end{figure}
+
 
 %\chapter{Falha de segurança no DNS}
 %Em Julho de 2008 foi anunciado pelo \textit{CERT} (\textit{Computer Emergency Readiness Team} -- Time de prontidão a emergências computacionais) que o pesquisador de segurança Dan Kaminsky havia descoberto uma falha fundamental no protocolo do DNS, definido nos RFC's 1034 \cite{rfc1034} e 1035 \cite{rfc1035}.
@@ -317,7 +387,9 @@ removidos consecutivamente.
 
 \chapter{Implementações e Mudanças Realizadas no Velvet}
 
-\section{Utilização de uma Arvore de prefixos}
+
+
+\section{Utilização de uma árvore de prefixos}
 Uma das primeiras implementações testadas foi uma árvore de prefixos com
 o objetivo de diminuir o tempo para encontrar o nó com l-1 bases
 adjacentes. Nos experimentos realizados, para um número pequeno de
@@ -337,15 +409,71 @@ memória do que armazenar um nucleotídio por byte, formando um bloco com
 Cada sequencia é armazenada com um vetor de tamanho n, onde o número de
 nucleotídios é no máximo 4n. Dentro da estrutura é armazenado o
 tabanho do vetor e qual a posição de término do ultimo nucleotídio da
-ultima posição do vetor.
+ultima posição do vetor. A implementação é muito parecida com o
+tightString do velvet, contudo algumas pequenas diferenças visam a
+mudança de objetivo da utilização. No velvet o tightString é utilizado
+apenas como armazenamento e não manipulação. Várias rotinhas de
+manipulação foram implementadas, como adição, comparação e o complemento
+foram realizadas. O complemento é o caso mais simples onde os bits de cada
+bloco são invertidas chegando ao resultado. Na adição de duas sequencias
+mais cálculos são necessários pois o cada bloco resultado pode vir de
+dois blocos adjacentes deslocados para direita ou para esquerda
+dependendo do deslocamento e quantas bases estão armazenadas no último
+bloco da primeira sequencia. A comparação pode ser realizada
+base-a-base, onde novamente vários calculos de deslocamento e máscara de
+bits são necessárias, tornando a comparação de um grande número de
+sequencias nos testes realizados muito mais caro do que no formato onde
+casa base ocupa um byte.
 
-\section{Criação de K-mers reduzida}
+
+\section{Criação de ``grudes'' reduzida}
 A busca das sobreposições é realizada comparando bloco a bloco as
 sequências. Ao invés de k-1 pares adjacentes, as sequencias são ligadas
 comparando bloco a bloco até que uma quantidade mínima de blocos seja
-igual. 
+igual. Após os testes realizados mostrando a ineficiência da comparação
+base-a-base no formato reduzido, uma nova abordagem foi realizada
+comparando os blocos ao invés das base. A cada par de sequencias o
+primeiro bloco é procurado na sequencia seguinte, quando encontrado o
+proximo bloco em cada sequencia é comparado até o proximo bloco em que
+há uma diferença. Se essa comparação obtiver um número mínimo de blocos
+iguais um ``grude'' é realizado, ligado a primeira sequencia até a
+segunda armazenando o ID da segunda sequencia na primeira e modificando
+um dos bytes de término.
 
-\section{Resultados}
+\begin{figure}[p] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+\begin{center}
+\includegraphics[scale=.7]{./figuras/busca1.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
+\end{center}
+\caption[Sobreposição de Sequencias]{Esquema da sobreposição de sequencias}
+\label{sobreposicao}
+\end{figure}
+
+\begin{figure}[b] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+\begin{center}
+\includegraphics[scale=.7]{./figuras/para3.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
+\end{center}
+\caption[Criação de ``grudes'']{Esquema da criação de ``grudes''}
+\label{grude}
+\end{figure}
+
+
+\section{Novas Idéias}
+Uma das propostas utilizando essa implementação reduzida seria criar um
+algoritmo para a correção de erros gerados na criação de ``grudes''
+reduzida, pois apesar da comparação ter o seu tempo reduzido algumas não
+são realizadas devida a comparação bloca-a-bloco. A comparação
+blobo-a-bloco força a criação de ``tips'' no grafo, onde o velvet tem
+por padrão descartá-las se não possuirem um tamanho mínimo. Ao invés de
+utilizar o velvet para corrigir os erros, um outro programa teria que
+utilizar um algoritmo modificado de Churchill-Waterman(23) nos ``tips''
+e combiná-los. Uma outra implementação que poderia ser realizada com os
+``grudes'' reduzido seria ao invés de utilizar a tabela hash para
+indexação dos k-mers utilizar uma árvore de prefixos de blocos na
+indexação, com os blocos a altura da árvore diminuiria consideravelmente
+e poderia ser utilizada, contudo uma abordagem mista que seja facilmente
+paralelizável seja mais interessante.
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Modelo para escrever TCCs, dissertações e teses utilizando LaTeX, ABNTeX e BibTeX
