@@ -159,12 +159,20 @@ organismo. Para que as leituras sejam ``encaixadas'' é utilizado a
 sobreposição de regiões repetidas nas leituras, como por exemplo
 
 \subsection{Detecção da Sobreposição}
-\subsection{Layout de Fragmentos}
+A detecção da sobreposição é realizada comparando o sufixo de uma
+sequencia com o prefixo da outra sequencia. Numa sequencia sem erros
+essa comparação poder ser realizada diretamente comparando as ultimas n
+bases da primeira sequencia com as primeiras n bases da segunda
+sequencia. Nos sequenciadores de primeira geração a taxa de erros era
+muito alta, o que impossibilitava a comparação direta, então
+a comparação entre duas leituras é realizada utilizado o algoritmo de
+Smith e Waterman. O algorimo possui complexidade quadrática.
+
+
 \subsection{Decisão da Sequência Consenso}
 As leituras podem ser comparadas através de suas sobreposições, com elas
 monta-se um grafo em que cada vértice é uma leitura e cada aresta
-se existir uma sobreposição[pevzner] entre elas. A comparação entre
-duas leituras é realizada utilizado o algoritmo de Smith e Waterman. O
+se existir uma sobreposição[pevzner] entre elas. O
 algoritmo encontra a melhor sobreposição possível, com essa sobreposição é
 dado um peso a aresta correspondente as duas leituras. O problema de
 montagem é então modelado para o problema do Caminho Hamiltoniano, onde
@@ -190,9 +198,22 @@ tempo hábil o problema devido a natureza exponencial da estratégia da montagem.
 %https://products.appliedbiosystems.com/ab/en/US/adirect/ab?cmd=catNavigate2&catID=600530&tab=DetailInfo
 
 
+
+
 \section{Montagem Atual}
+A abordagem atual para a montagem de fragmentos se baseia no grafo de
+Bruijn. Em uma maneira simplificada nós podemos visualizar a construção
+de um grafo de Bruijn representando as sequencias como um ``fio'' e as
+regiões repetidas cobertas por uma ``cola'' que ``prende'' elas juntas.
+Nessa representação cada repetição corresponde a uma aresta ao invés de
+uma coleção de vértices.
 
 \subsection{``Grude'' ou K-mers}
+Uma das grandes dificuldades nesse método é a criação desses ``grudes'',
+pois não há como saber com antecedência como as sequencias ``encaixam''
+entre si no código final. Isso é realizado de uma maneira aproximada e
+algoritmos para a correção de erros é utilizada para sanar imperfeições
+na montagem realizadas nessa fase.
 
 \subsection{Grafo de Bruijn}
 O grafo de Bruijn é montado criando vértices que são partes repetidas de
@@ -209,9 +230,20 @@ de construí-lo. Os vértices criados através de leituras unidas necessita
 do conhecimento do DNA completo, que não está disponível até a fase
 final.
 
-\subsection{Caminho Euleriano}
 \subsection{Supercaminho Euleriano}
+O problema do Supercaminho euleriano é definido como "Dado um grafo de Bruijn e uma colação de caminhos neste grafo,
+ encontre um caminho Euleriano neste grafo que contenha todos estes caminhos como subcaminhos".
+ Dada uma coleção de reads (cadeias) S={s1, s2, ..., sn} de um projeto de sequenciamento e um inteiro l,
+ o spectrum de S é o conjunto Sl de todas as l-tuplas dos reads s1, s2, ..., sn. 
+Uma (l-1)-tupla v E Sl-1 é ligado por uma aresta direcionada com (l-1)tupla w E Sl-1, 
+se Sl contém uma l-tupla onde os primeiros l-1 nucleotídeos coincidem com os ultismos l-1 nucleotídeos de w.
+ Cada l-tupla de Sl corresponde a uma aresta no grafo. Se S contem apenas uma sequencia S1 then essa sequencia
+ corresponde a um caminho visitando cada aresta uma vez, esse problema é intimimamente relacionado ao problema
+ de encontrar o caminho visitando cada aresta do grafo apenas uma vez, um problema do caminho euleriano.
+ Nós podemos transformar o problema num caminho euleriano introduzindo multiplicidades
+nas arestas do grafo de bruijn.
 \subsection{Remoção de Erros}
+
 \subsection{Problemas}
 
 \chapter{O montador Velvet}
