@@ -47,16 +47,19 @@ genético é descobrir a sequência de bases hidrogenadas que formam o código genét
 O processo do sequenciamento consegue descobrir um número limitado de bases por vez. O conjunto de bases
 contínuas é chamado de leitura, e através de várias leituras é possível descobrir todo o código genético
 do organismo. A representação dessas leituras pode ser feita através de strings em que cada letra representa uma base.
-A \cite{arquivo_leituras} mostra um exemplo de um arquivo de leituras.
+A \ref{arquivo-leituras} mostra um exemplo de um arquivo de leituras.
 
 \begin{figure}[h] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
 \begin{center}
 \includegraphics[scale=.7]{./figuras/leit1.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
 \end{center}
 \caption{Um exemplo de um arquivo de leituras}
-\label{arquivo_leituras}
+\label{arquivo-leituras}
 \end{figure}
 
+Cada linha iniciada com ``>'' na \ref{arquivo-leituras} determina o
+identificador da leitura e na sua linha seguinte estão as bases
+pertencentes a leitura. C
 
 Para se obter o código genético completo é necessário comparar e organizar as leituras, para isso são utilizados
 montadores. Os montadores são responsáveis por organizar as leituras
@@ -71,6 +74,19 @@ para corresponder ao que está no genoma.
 \label{leituras}
 \end{figure}
 
+ As leituras são comparadas
+entre si utilizando as sobreposições entre o final de uma leitura e o
+começo da próxima. A \ref{montagem} demonstra como é realizado uma
+montagem das leituras, as letras ou bases coloridas são as
+sobreposições, após a comparação e montagem, uma única sequencia é
+gerada chamada de contig.
+O objetivo de um montador é utilizar essas leituras para descobrir uma
+sequência contínua pertencente ao código genético, dificilmente é
+possivel obter uma sequencia única que cubra todo o DNA sequenciado pois
+regiões repetidas no genoma, erros nas leituras e até mesmo regiões que
+não foram cobertas pelas leituras impedem que uma sequência única possa
+ser montada.
+
 \begin{figure}[h] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
 \begin{center}
 \includegraphics[scale=.4]{./figuras/montagem1.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
@@ -79,18 +95,26 @@ para corresponder ao que está no genoma.
 \label{montagem}
 \end{figure}
 
+Tomando como exemplo as leituras da \ref{montagem} vamos utilizar um
+algoritmo simples para realizar a montagem. Esse algoritmo é dividido em
+3 partes:
+\begin{enumerate}
+\item Detecção das Sobreposições entre as leituras
+\item Criação do Grafo de Sobreposições
+\item Descobrir o caminho no grafo que utiliza todas as leituras
+\end{enumerate}
+
+
 
 \chapter{Montagem}
 
 \section{Montagem Tradicional}
-%
-%
-Os sequenciadores conseguem ler apenas um número limitado de bases, esse
-número limitado de bases é chamado de leitura. No sequenciamento
-aleatório a posição da leitura é desconhecido e,  para descobrir a sua
-posição, as leituras são comparadas entre si e organizadas para tentar
-criar uma sequencia única. Nos sequenciadores clássicos as leituras
-variavam normalmente entre 500 e 800 bp. Todas essas leituras devem ser
+
+Os primeiros montadores como o phrep/phrap trabalhavam com arquivos de
+entrada com 96 leituras com tamanho variando entre 500 a 800
+bases. Esses tamanhos poderiam variar um pouco dependendo do
+sequenciador sendo utilizado, porém a quantidade de leituras não passava
+de algumas centenas. Todas essas leituras devem ser
 então ``encaixadas'' para se obter o código genético completo do
 organismo. Para que as leituras sejam ``encaixadas'' é utilizado a
 sobreposição de regiões repetidas nas leituras, como por exemplo
