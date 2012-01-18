@@ -29,116 +29,55 @@ O capítulo 2 trata dos sequenciadores genéticos e como eles geram o
 problema computacional da montagem, támbém realiza uma perspectiva
 histórica de como o sequenciamento vem evoluindo. Já o capítulo 3 trata
 do problema da montagem de uma forma geral e qual a complexidade
-computacional para tratá-lo. O capítulo 4 trata o velvet e como ele
+computacional para tratá-lo, mostrando como a montagem era realizada nos
+sequenciadores de primeira geração e como ela é realizada nos montadores
+atuais. O capítulo 4 trata o velvet e como ele
 trata do problema da montagem. O capíutlo 5 mostra como foram
-implementadas as alterações na tabela hash e como foi realizada a
-paralelização. O capítulo 6 mostra os resultados obtidos.
-
-\chapter{Sequenciamento}
-\section{Sequenciamento Tradicional}
-O sequenciamento consiste em se conseguir ``ler'' ou ``descobrir'' em que
-ordem as bases nucléicas A,C,G,T se encontram no código genético de um organismo.
-Para se conseguir ``ler'' essas bases vários métodos químicos são utilizados para
-descobrir qual base está em que posição do código genético. Compostos químicos complementares
-são misturados a solução com o DNA a ser sequenciado, em uns dos métodos átomos radioativos
-eram utilizados para marcar cada base, e depois uma espécie de radiografia da sequencia era realizada.
-A partir dessa idéia foram adicionados aos compostos complementares corantes fluorecentes, esses corantes
-ao serem excitados com laser produziam uma intensidade de onde dependendo da base presente.
-Com essa imagem, uma análise era feita das intensidade das cores para determinar a sequencia lida.
-Um dos grandes problemas nesse método é distinguir a quantidade de n marcas consecutivas e qualidade
-das ``fotografias'' geradas, por isso várias cópias eram geradas e sequenciadas.
-Essas ``fotografias'' tiradas do código genético não são completas, ou seja, não contém todo o código genético
-e sim uma parte dele. Uma comparação possível seria como tirar uma foto de um texto, há um compromisso entre
-tamanho e qualidade, é possível fotografar todo o texto com uma qualidade pequena, imposibilitando a identificação
-das letras, ou fotografar parágrafo por parágrafo, e a partir deles montar o texto completo. Tendo isso em vista
-podemos analizar as duas formas tradicionais de sequenciamento.
+implementadas o início do montador e como ele se aplica ao velvet.
 
 
-\subsection{Sequenciamento Dirigido}
-% www.elsevier.com/locate/jbiotec
-% DOE92
-% GUS97
-% 20 linhas - 7
-O método mais comum de sequenciamento dirigido é o primer walking. Esse
-método consiste em identificar uma sequência conhecida, e a partir dela
-ler a sequencia adjacente. Essa nova sequência então é utilizado para
-identificar a próxima leitura e então uma nova sequencia é
-gerada. Dessa maneira ``anda-se'' por toda a sequência e o cromossomo é
-lido do começo ao fim.
-Apesar da simplicidade teórica do método, a sua implementação é muito difícil e de custo alto.
-Admitindo que uma sequencia já é conhecida, para conseguirmos a próxima sequencia é necessário
-gerar um composto químico que ``encaixe'' com a parte final da sequencia conhecida para então
-obter a continuação da sequencia. Alguns desses compostos químicos para ``encaixe'' poderiam difíceis
-de serem produzidos, os tornando muitos caros, ou até mesmo raramente utilizados elevando o seu preço 
-de produção. Aliado isso ao fato de que só era possível iniciar o sequenciamento de um fragmento depois
-que outro já estivesse completo, torna esse método muito mais lendo que o sequenciamento aleatório.
+\chapter{O problema da montagem}
 
-\subsection{Sequenciamento Aleatório}
-% MW96
-% Mye99
-% WM97
-% Gre97
-% Ms94
-% 20 linhas - 8
-A estratégia shotgun para o sequenciamento genético consiste em quebrar
- o DNA em segmentos de vários tamanhos e então clonar
-esses segmentos em vetores. Esses segmentos então são sequenciados e
-várias leituras aleatórias do organismo são geradas. Essas leituras
-então são comparadas e montadas, gerando assim várias sequências maiores
-chamadas de contigs. A combinação de todos os contigs então é realizada
-para descobrir o DNA completo do organismo, normalmente técnicas de
-sequenciamento dirigido é realizado para sequenciar as partes faltantes.
-Uma das grandes vantages do sequenciamento aleatório sobre o dirigido é a
-possibilidade de sequenciar várias partes do DNA ao mesmo tempo, sem a necessidade
-de utilizar compostos para ``encaixar'' em algum ponto da sequencia. Assim, o trabalho
-de ``montar'' o código genético completo não é mais realizado totalmente no
-sequenciamento e sim através da utilização de softwares para ``montar'' ou
-``encaixar'' esses fragmentos sequenciados.
+O DNA é um composto orgânico cujas moléculas contêm as instruções genéticas
+ que coordenam o desenvolvimento e funcionamento de todos os seres vivos e alguns vírus.
+Ele é composto por uma longa cadeia de nucleotídios que se diferenciam pela sua base hidrogenada
+que vamos chamar de A (adenina), C (citosia), T(timina) e G(guanina). O objetivo do sequenciamento
+genético é descobrir a sequência de bases hidrogenadas que formam o código genético de um organismo.
 
-\section{Sequenciadores de Nova Geração}
-% 20 linhas - 14
-Três plataformas para o sequenciamento massivamente paralelo como o
-Roche/454 FLX, o Illumina/Solexa Genome Analizer e o Applied Biosystems
-SOLiD System. Esses instrumentos permitem uma grande simplificação no
-processo de preparação do sequenciamento do DNA, o que economiza tempo e
-um requerimento menor assossiado aos equipamentos muito automatizados,
-com muitos passos e baseados em clonagem. Por métodos diferentes, cada
-tecnologia procura amplificar cada fita dos fragmentos de amostra e
-realiza várias reações nelas.
-Uma outra diferença das novas plataformas é a diferença do tempo
-necessário para a geração dos dados. Os sequenciadores clássicos
-necessivam de tempos entre 8 horas e 10 dias.
-O rendimento dos dados dos experimentos também mudaram drasticamente, ao
-ínvés de 96 leituras com até 750 nucleotídios cada. Os novos sequenciadores variam
-entre centenas de milhares de leituras até 10 milhões de leituras.
+O processo do sequenciamento consegue descobrir um número limitado de bases por vez. O conjunto de bases
+contínuas é chamado de leitura, e através de várias leituras é possível descobrir todo o código genético
+do organismo. A representação dessas leituras pode ser feita através de strings em que cada letra representa uma base.
+A \cite{arquivo_leituras} mostra um exemplo de um arquivo de leituras.
 
-%\subsection{Applied Biosystems SOLiD Sequencer}
+\begin{figure}[h] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+\begin{center}
+\includegraphics[scale=.7]{./figuras/leit1.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
+\end{center}
+\caption{Um exemplo de um arquivo de leituras}
+\label{arquivo_leituras}
+\end{figure}
 
 
-\subsection{Sequeciamento com Referência}
-No sequenciamento com referencia algum organismo da mesma espécie já foi
-sequenciado, e através dele, as leituras são mapeadas para esse organismo
-``exemplo''. O objetivo é encontrar as diferenças entre o organismo exemplo
-e aquele em que está sendo sequenciado. O trabalho computacional concentra-se
-apenas em comparar as sequencias lidas ao exemplo, e marcar o local onde 
-os melhores encaixes são obtidos. Assim as bases nas leituras que não correspondem
-ao código exemplo seriam a diferença entre os 2 organismos.
+Para se obter o código genético completo é necessário comparar e organizar as leituras, para isso são utilizados
+montadores. Os montadores são responsáveis por organizar as leituras
+para corresponder ao que está no genoma.
 
 
-\subsection{Sequenciamento De Novo}
-Inicialmente esses sequenciadores eram utilizados para sequenciar o
-código genético de organismos já conhecidos. As leituras eram mapeadas
-para um ``esqueleto'' já conhecido e através dele era montado o novo
-código genético. Sequenciar o código genético de um organismo que ainda
-não foi sequenciado, ou seja, em que não existe um ``esqueleto'' é
-conhecido como sequenciamento De novo.
-Uma das grandes dificuldades para realizar um sequenciamento de novo com
-os sequenciadores de nova geração é o grande aumento no número de
-leituras. Muitos softwares de montagem utilizados nos sequencidores
-clássicos eram incapazes de trabalhar com esse novos dados. Novos montadores
-foram criados para conseguir realizar um sequenciamento de novo com os
-sequenciadores de nova geração.
+\begin{figure}[h] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+\begin{center}
+\includegraphics[scale=.4]{./figuras/montagem2.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
+\end{center}
+\caption{Leituras Retiradas do código genético}
+\label{leituras}
+\end{figure}
 
+\begin{figure}[h] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+\begin{center}
+\includegraphics[scale=.4]{./figuras/montagem1.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
+\end{center}
+\caption{Uma montagem realizada através das leituras}
+\label{montagem}
+\end{figure}
 
 
 \chapter{Montagem}
@@ -190,10 +129,9 @@ CELERA. Esses programas contudo só conseguem realizar a montagem para
 sequenciadores de primeira geração onde o número de leituras eram perto
 de 100 e cada leitura possuia entre 400bp e 900bp. Sequenciadores de
 segunda geração como o ABI Solid geram em torno de 10 milhões leituras onde
-cada leitura possui entre 35bp até 50bp. Devido ao grande
+cada leitura possui entre 35bp até 50bp\cite{applied}. Devido ao grande
 aumento no número de leituras esses programas não conseguem tratar em
 tempo hábil o problema devido a natureza exponencial da estratégia da montagem.
-%https://products.appliedbiosystems.com/ab/en/US/adirect/ab?cmd=catNavigate2&catID=600530&tab=DetailInfo
 
 
 
@@ -219,8 +157,8 @@ na montagem realizadas nessa fase.
 \includegraphics[scale=.4]{./figuras/grude.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
 \end{center}
 \caption[Implementação dos Kmers ou ``grudes'']{Esquema da implementação dos
-  k-mers ou ``grudes'', retirado de \cite{steve}}
-\label{kmer-velvet}
+  k-mers ou ``grudes'', retirado de \cite{schatz}}
+\label{kmer}
 \end{figure}
 
 
@@ -256,19 +194,20 @@ nas arestas do grafo de bruijn.
 \subsection{Remoção de Erros}
 Uma abordagem gulosa para o problema da correção de erros seria olhar
 para correções em leituras que dimínuíssem o tabalho Sl por 2l. Esse
-procedimento simples já elimina 86.5\% dos erros nas
+procedimento simples já elimina 85.6\% \cite{pevzner} dos erros nas
 sequencias[pevzner]. Um dos fatos importantes nessa fase não é somente
 tentar corrigir alguns erros, mas também simplificar o grafo de
 bruijn. Dessa maneira poderíamos retirar arestas faltas no grafo e
 tratar desse problema depois que ele estiver pronto. Uma maneira fácil
 de corrigir esses problemas depois seria utilizar uma variação do
-algoritmo de Churchill-Waterman(23) para reconstruir os nucleotídeos duvidosos.
+algoritmo de Churchill-Waterman para reconstruir os nucleotídeos duvidosos.
 
 \begin{figure}[b] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
 \begin{center}
 \includegraphics[scale=.5]{./figuras/montagem.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
 \end{center}
-\caption[Exemplos de Monagem]{Ilustrações dos algoritmos de montagem, retirado de \cite{steve}}
+\caption[Exemplos de Monagem]{Ilustrações dos algoritmos de montagem,
+  retirado de \cite{schatz}}
 \label{montagens}
 \end{figure}
 
@@ -294,7 +233,7 @@ que representa a ordem inversa do seu complemento dos nucleotídios. A
 união do nó com seu inverso é chamado bloco. Cada bloco tem dois lados
 distintos, cada lado é ligado por um ``arco'' direcionado. Contudo se um
 arco vai de A pra B, um arco simétrico vai de /B pra /A. Os nós e os
-arcos são mapenado como ``caminhos'' atravessando o grafo.[velvet]
+arcos são mapenado como ``caminhos'' atravessando o grafo.\cite{velvet}
 Cada k-mer no velvet armazena o seu próprio complemento, mesmo que ele
 não esteja presente nas leituras, ou seja, se existir um k-mer com as
 bases GTA o seu complemento CAT vai ser adicionado reversamente no
@@ -307,7 +246,7 @@ ele seja o seu próprio complemento.
 \includegraphics[scale=.3]{./figuras/kmer.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
 \end{center}
 \caption[Implementação do Kmer do velvet]{Esquema da implementação do
-  k-mer do velvet, retirado de \cite{steve}}
+  k-mer do velvet, retirado de \cite{velvet}}
 \label{kmer-velvet}
 \end{figure}
 
@@ -376,7 +315,7 @@ sequenciamento, dois fatores são utilizados: tamanho e contagem. Se o
 \begin{center}
 \includegraphics[scale=.3]{./figuras/tourbus.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
 \end{center}
-\caption[Correção de erros no velvet]{Esquema da correção de bolhas no velvet, retirado de \cite{steve}}
+\caption[Correção de erros no velvet]{Esquema da correção de bolhas no velvet, retirado de \cite{velvet}}
 \label{erros-velvet}
 \end{figure}
 
@@ -456,6 +395,14 @@ um dos bytes de término.
 \label{grude}
 \end{figure}
 
+\begin{figure}[b] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+\begin{center}
+\includegraphics[scale=.7]{./figuras/para6.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
+\end{center}
+\caption[Criação de ``grudes'' em paralelo]{Esquema da criação de
+  ``grudes'' em paralelo}
+\label{grude1}
+\end{figure}
 
 \section{Novas Idéias}
 Uma das propostas utilizando essa implementação reduzida seria criar um

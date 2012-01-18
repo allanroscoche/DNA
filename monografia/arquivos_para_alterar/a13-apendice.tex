@@ -1,6 +1,110 @@
-\chapter{Nome para este Apêndice}
+\chapter{Sequenciamento}
 
-Texto de exemplo!
+\section{Sequenciamento Tradicional}
+O sequenciamento consiste em se conseguir ``ler'' ou ``descobrir'' em que
+ordem as bases nucléicas A,C,G,T se encontram no código genético de um organismo.
+Para se conseguir ``ler'' essas bases vários métodos químicos são utilizados para
+descobrir qual base está em que posição do código genético. Compostos químicos complementares
+são misturados a solução com o DNA a ser sequenciado, em uns dos métodos átomos radioativos
+eram utilizados para marcar cada base, e depois uma espécie de radiografia da sequencia era realizada.
+A partir dessa idéia foram adicionados aos compostos complementares corantes fluorecentes, esses corantes
+ao serem excitados com laser produziam uma intensidade de onde dependendo da base presente.
+Com essa imagem, uma análise era feita das intensidade das cores para determinar a sequencia lida.
+Um dos grandes problemas nesse método é distinguir a quantidade de n marcas consecutivas e qualidade
+das ``fotografias'' geradas, por isso várias cópias eram geradas e sequenciadas.
+Essas ``fotografias'' tiradas do código genético não são completas, ou seja, não contém todo o código genético
+e sim uma parte dele. Uma comparação possível seria como tirar uma foto de um texto, há um compromisso entre
+tamanho e qualidade, é possível fotografar todo o texto com uma qualidade pequena, imposibilitando a identificação
+das letras, ou fotografar parágrafo por parágrafo, e a partir deles montar o texto completo. Tendo isso em vista
+podemos analizar as duas formas tradicionais de sequenciamento.
+
+
+\subsection{Sequenciamento Dirigido}
+% www.elsevier.com/locate/jbiotec
+% DOE92
+% GUS97
+% 20 linhas - 7
+O método mais comum de sequenciamento dirigido é o primer walking. Esse
+método consiste em identificar uma sequência conhecida, e a partir dela
+ler a sequencia adjacente. Essa nova sequência então é utilizado para
+identificar a próxima leitura e então uma nova sequencia é
+gerada. Dessa maneira ``anda-se'' por toda a sequência e o cromossomo é
+lido do começo ao fim \cite{lemos}.
+Apesar da simplicidade teórica do método, a sua implementação é muito difícil e de custo alto.
+Admitindo que uma sequencia já é conhecida, para conseguirmos a próxima sequencia é necessário
+gerar um composto químico que ``encaixe'' com a parte final da sequencia conhecida para então
+obter a continuação da sequencia. Alguns desses compostos químicos para ``encaixe'' poderiam difíceis
+de serem produzidos, os tornando muitos caros, ou até mesmo raramente utilizados elevando o seu preço 
+de produção. Aliado isso ao fato de que só era possível iniciar o sequenciamento de um fragmento depois
+que outro já estivesse completo, torna esse método muito mais lendo que o sequenciamento aleatório.
+
+\subsection{Sequenciamento Aleatório}
+% MW96
+% Mye99
+% WM97
+% Gre97
+% Ms94
+% 20 linhas - 8
+A estratégia shotgun para o sequenciamento genético consiste em quebrar
+ o DNA em segmentos de vários tamanhos e então clonar
+esses segmentos em vetores. Esses segmentos então são sequenciados e
+várias leituras aleatórias do organismo são geradas. Essas leituras
+então são comparadas e montadas, gerando assim várias sequências maiores
+chamadas de contigs. A combinação de todos os contigs então é realizada
+para descobrir o DNA completo do organismo, normalmente técnicas de
+sequenciamento dirigido é realizado para sequenciar as partes faltantes.
+Uma das grandes vantages do sequenciamento aleatório sobre o dirigido é a
+possibilidade de sequenciar várias partes do DNA ao mesmo tempo, sem a necessidade
+de utilizar compostos para ``encaixar'' em algum ponto da sequencia. Assim, o trabalho
+de ``montar'' o código genético completo não é mais realizado totalmente no
+sequenciamento e sim através da utilização de softwares para ``montar'' ou
+``encaixar'' esses fragmentos sequenciados.
+
+\section{Sequenciadores de Nova Geração}
+% 20 linhas - 14
+Três plataformas para o sequenciamento massivamente paralelo como o
+Roche/454 FLX, o Illumina/Solexa Genome Analizer e o Applied Biosystems
+SOLiD System. Esses instrumentos permitem uma grande simplificação no
+processo de preparação do sequenciamento do DNA, o que economiza tempo e
+um requerimento menor assossiado aos equipamentos muito automatizados,
+com muitos passos e baseados em clonagem. Por métodos diferentes, cada
+tecnologia procura amplificar cada fita dos fragmentos de amostra e
+realiza várias reações nelas.
+Uma outra diferença das novas plataformas é a diferença do tempo
+necessário para a geração dos dados. Os sequenciadores clássicos
+necessivam de tempos entre 8 horas e 10 dias.
+O rendimento dos dados dos experimentos também mudaram drasticamente, ao
+ínvés de 96 leituras com até 750 nucleotídios cada. Os novos sequenciadores variam
+entre centenas de milhares de leituras até 10 milhões de leituras.
+
+%\subsection{Applied Biosystems SOLiD Sequencer}
+
+
+\subsection{Sequeciamento com Referência}
+No sequenciamento com referencia algum organismo da mesma espécie já foi
+sequenciado, e através dele, as leituras são mapeadas para esse organismo
+``exemplo''. O objetivo é encontrar as diferenças entre o organismo exemplo
+e aquele em que está sendo sequenciado. O trabalho computacional concentra-se
+apenas em comparar as sequencias lidas ao exemplo, e marcar o local onde 
+os melhores encaixes são obtidos. Assim as bases nas leituras que não correspondem
+ao código exemplo seriam a diferença entre os 2 organismos.
+
+
+\subsection{Sequenciamento De Novo}
+Inicialmente esses sequenciadores eram utilizados para sequenciar o
+código genético de organismos já conhecidos. As leituras eram mapeadas
+para um ``esqueleto'' já conhecido e através dele era montado o novo
+código genético. Sequenciar o código genético de um organismo que ainda
+não foi sequenciado, ou seja, em que não existe um ``esqueleto'' é
+conhecido como sequenciamento De novo.
+Uma das grandes dificuldades para realizar um sequenciamento de novo com
+os sequenciadores de nova geração é o grande aumento no número de
+leituras. Muitos softwares de montagem utilizados nos sequencidores
+clássicos eram incapazes de trabalhar com esse novos dados. Novos montadores
+foram criados para conseguir realizar um sequenciamento de novo com os
+sequenciadores de nova geração.
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Modelo para escrever TCCs, dissertações e teses utilizando LaTeX, ABNTeX e BibTeX
