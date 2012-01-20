@@ -57,9 +57,9 @@ A \ref{arquivo-leituras} mostra um exemplo de um arquivo de leituras.
 \label{arquivo-leituras}
 \end{figure}
 
-Cada linha iniciada com ``>'' na \ref{arquivo-leituras} determina o
+Cada linha iniciada com ``\guilsinglright''  na \ref{arquivo-leituras} determina o
 identificador da leitura e na sua linha seguinte estão as bases
-pertencentes a leitura. C
+pertencentes a leitura.
 
 Para se obter o código genético completo é necessário comparar e organizar as leituras, para isso são utilizados
 montadores. Os montadores são responsáveis por organizar as leituras
@@ -103,6 +103,83 @@ algoritmo simples para realizar a montagem. Esse algoritmo é dividido em
 \item Criação do Grafo de Sobreposições
 \item Descobrir o caminho no grafo que utiliza todas as leituras
 \end{enumerate}
+
+\section{Detecção das Sobreposições}
+As leituras são comparadas utilizando as sobreposições entre elas. Para
+encontrar uma sobreposição entre duas leituras de tamanho m, vamos
+comparar as ultimas m-1 bases da primeira sequencia com as primeiras m-1
+bases da segunda, caso não sejam iguais vamos comparar as ultimas m-2
+bases da primeira com as m-2 primeiras bases da segunda leitura. Vamos
+fazer isso até m-x=1, ou seja, até compararmos apenas a ultima base da
+primeira leitura com primeira base da segunda leitura.
+A \ref{sobreposicao1} mostra 3 passos até a sobreposição ser
+encontrada. A sobreposição é marcada com as bases em azul.
+\begin{figure}[h] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+\begin{center}
+\includegraphics[scale=.4]{./figuras/sopreposicao2.eps} 
+\end{center}
+\caption{Procura de uma sobreposição direta}
+\label{sobreposicao1}
+\end{figure}
+
+Com essa comparação vamos obter uma sobreposição que varia entre m-1 a 1.
+Para cada leitura vamos realizar essa comparação com todas as outras
+leituras de entrada, logo, para um arquivo com n leituras, vamos
+realizar n-1 comarações para a primeira leitura, n-1 comparações para a
+segunda leitura até penultima leitura ser comparada com a ultima.
+
+\begin{figure}[h] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+\begin{center}
+\includegraphics[scale=.4]{./figuras/sopreposicao1.eps} 
+\end{center}
+\caption{Uma montagem realizada através das leituras}
+\label{sobresicao2}
+\end{figure}
+
+
+\section{Criação do Grafo de Sobreposições}
+
+Utilizando as sobreposições entre as leituras será criado um grafo onde
+cada leitura é um vértice e cada sobreposição é uma aresta entre esses
+dois vértices. A \ref{grafo1} mostra como ficaria o grafo de sobreposições das
+leituras da \ref{leituras}. A sobreposição entre o vértice A e D é 0, logo não
+foi criada uma aresta. As arestas possuem um peso de acordo com a
+sobreposição entre as leituras, logo possuiem um valor entre m-1 e 1.
+As arestas foram coloridas para facilitar a visualização das
+sobreposições, algumas bases nas leituras também foram coloridas com
+esse propósito.
+
+
+\begin{figure}[h] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+\begin{center}
+\includegraphics[scale=.4]{./figuras/grafo_1.eps} 
+\end{center}
+\caption{Grafo de sobreposições}
+\label{grafo1}
+\end{figure}
+
+
+\section{Caminho no Grafo de Sobreposições}
+Com a criação do grafo realizada, temos que encontrar o caminho que
+passe por todos os vértices e que possua a maior sobreposição
+possivel. Encontramos esse caminho iniciando com a aresta AC, depois
+indo para a aresta CB e BD. Com esse caminho conseguimos gerar um contig
+que cobre aproximadamente 90\% do código genético sequenciado, deixando
+apenas 1 base não sequenciada. Como esse exemplo mostra, alguma parte do
+código genético pode não ter sido coberta por nenhuma leitura, criando
+falhas ou ``gaps'' na nossa montagem.
+
+
+
+\begin{figure}[h] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+\begin{center}
+\includegraphics[scale=.4]{./figuras/grafo_2.eps}
+\end{center}
+\caption{Caminho no Grafo}
+\label{sobresicao2}
+\end{figure}
+
+
 
 
 
