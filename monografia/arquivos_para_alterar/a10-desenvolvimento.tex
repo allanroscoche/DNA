@@ -192,9 +192,9 @@ entrada com 96 leituras com tamanho variando entre 500 a 800
 bases. Esses tamanhos poderiam variar um pouco dependendo do
 sequenciador sendo utilizado, porém a quantidade de leituras não passava
 de algumas centenas. Todas essas leituras devem ser
-então ``encaixadas'' para se obter o código genético completo do
-organismo. Para que as leituras sejam ``encaixadas'' é utilizado a
-sobreposição de regiões repetidas nas leituras, como por exemplo
+então comparadas para se obter o código genético completo do
+organismo. A estratégia de montagem dos programas como o phrap/phrep possuem
+algumas diferenças da estratégia que foi demonstrado no exemplo.
 
 \subsection{Detecção da Sobreposição}
 A detecção da sobreposição é realizada comparando o sufixo de uma
@@ -202,9 +202,14 @@ sequencia com o prefixo da outra sequencia. Numa sequencia sem erros
 essa comparação poder ser realizada diretamente comparando as ultimas n
 bases da primeira sequencia com as primeiras n bases da segunda
 sequencia. Nos sequenciadores de primeira geração a taxa de erros era
-muito alta, o que impossibilitava a comparação direta, então
-a comparação entre duas leituras é realizada utilizado o algoritmo de
-Smith e Waterman. O algorimo possui complexidade quadrática.
+aproximadamente 15\% \[ verificar nas referencias\], o que impossibilitava
+a comparação direta, então a comparação entre duas leituras é realizada
+utilizado o algoritmo de Smith e Waterman. O algoritmo usa programação dinâmica
+para achar a melhor combinação entre as duas leituras. As sobreposições entre as
+leituras podem conter alguns erros que não ocorrem na comparação direta como:
+\begin{itemize}
+\item Deslocamento
+\item 
 
 
 \subsection{Decisão da Sequência Consenso}
