@@ -1,538 +1,263 @@
-\chapter{Introdução}
-Um pré-requisito para a compreensão completa da biologia de um organismo
-é determinar toda a sua sequência genética. Agora nesse momento, há
-vários projetos de sequenciamento genético em andamento para vários
-organismos. Uma parte importante desses projetos é a montagem das partes do
-DNA desses seres vivos, onde técnicas cada vez mais sofisticadas de computação vem
-sendo utilizadas para superar esse desafio.
-
-\section{Motivação}
-Com o desenvolvimento de novos sequenciadores capazes de gerar vários
-gigabytes de dados em algumas horas, os softwares necessitam cada vez
-mais de sofisticações para conseguir lidar com esses dados. Vários
-montadores foram criados para conseguir mostrar resultados em tempo
-hábil, contudo máquinas cada vez mais poderosas são necessárias.
-Montadores como o Velvet necessitam de quantidades cada vez maiores de
-memória. Sendo que apenas computadores de grande porte conseguem atendem
-as necessidades do software. Estudar as possibilidades de economia de
-memória para que seja possível fazer o sequenciamento de seres maiores
-nas máquinas atuais e a capacidade de fácil distribuição do trabalho
-para que vários processadores possam trabalhar ao mesmo tempo.
-
-\section{Objetivos}
-O objetivo do projeto foi criar alguma modificação na criação da tabela
-hash do velvet, de uma maneira que ela utilizasse menos memória e que
-pudesse ser criada paralelamente de uma forma eficiente.
-
-\section{Organização do Trabalho}
-O capítulo 2 trata dos sequenciadores genéticos e como eles geram o
-problema computacional da montagem, támbém realiza uma perspectiva
-histórica de como o sequenciamento vem evoluindo. Já o capítulo 3 trata
-do problema da montagem de uma forma geral e qual a complexidade
-computacional para tratá-lo, mostrando como a montagem era realizada nos
-sequenciadores de primeira geração e como ela é realizada nos montadores
-atuais. O capítulo 4 trata o velvet e como ele
-trata do problema da montagem. O capíutlo 5 mostra como foram
-implementadas o início do montador e como ele se aplica ao velvet.
-
 
 \chapter{O problema da montagem}
 
-O DNA é um composto orgânico cujas moléculas contêm as instruções genéticas
- que coordenam o desenvolvimento e funcionamento de todos os seres vivos e alguns vírus.
-Ele é composto por uma longa cadeia de nucleotídios que se diferenciam pela sua base hidrogenada
-que vamos chamar de A (adenina), C (citosia), T(timina) e G(guanina). O objetivo do sequenciamento
-genético é descobrir a sequência de bases hidrogenadas que formam o código genético de um organismo.
+O problema da montagem surgiu com o desenvolvimento do sequênciamento
+genético, onde novas estratégias foram adotadas e com elas, processos
+mecânicos e químicos puderam ser substituídos por soluções computacionais.
+Para entender o surgimento do problema, é necessário também a
+compreensão de como sequenciamento é realizado, e quais são suas limitações.
 
-O processo do sequenciamento consegue descobrir um número limitado de bases por vez. O conjunto de bases
-contínuas é chamado de leitura, e através de várias leituras é possível descobrir todo o código genético
-do organismo. A representação dessas leituras pode ser feita através de strings em que cada letra representa uma base.
-A \ref{arquivo-leituras} mostra um exemplo de um arquivo de leituras.
+\section{Estratégias de sequenciamento}
 
-\begin{figure}[h] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+Sequenciar um genoma não é uma tarefa simples e envolve
+múltiplos processos: clonagem do DNA, mapeamento físico,
+subclonagem, sequenciamento e análise da informação. E em muitos desses
+processos a quantidade de informação que pode ser gerada de cada vez é
+limitada. Com isso, o sequenciamento de um genoma é realizado lendo um
+pedaço de cada vez. Os pedaços lidos são utilizados para descobrir regiões
+genéticas maiores, como por exemplo os genes.
+
+As estratégias utilizadas acabem se classificado em duas categorias: a direcionada e aleatória.
+
+\subsubsection{Estratégia direcionada}
+Essa estratégia permite a análise direta e sequencial de um grande
+fragmento de DNA do início ao fim. A técnica consiste em a partir de uma
+leitura inicial, ir caminhando pela sequência genética lendo um pedaço
+adjacente por vez até chegar ao final do código sequenciado. Para a
+realização dessa estratégia, a próxima leitura começará no final da
+anterior, utilizando a sobreposição entre as duas para certificar de que
+se trata da continuação da leitura anterior.
+
+
+Podemos observar na figura ~\ref{fig01} as sobreposições das leituras e sentido do sequenciamento.
+
+\begin{figure}[ht] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
 \begin{center}
-\includegraphics[scale=.7]{./figuras/leit1.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
+\includegraphics[scale=.9]{./figuras/direcionado.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
 \end{center}
-\caption{Um exemplo de um arquivo de leituras}
-\label{arquivo-leituras}
+ 
+\caption[Estratégia direcionada (aparece na Lista de
+  Figuras)]{Sequenciamento utilizando a estratégia direcionada}
+\label{fig01}
 \end{figure}
 
-Cada linha iniciada com ``\guilsinglright''  na \ref{arquivo-leituras} determina o
-identificador da leitura e na sua linha seguinte estão as bases
-pertencentes a leitura.
-
-Para se obter o código genético completo é necessário comparar e organizar as leituras, para isso são utilizados
-montadores. Os montadores são responsáveis por organizar as leituras
-para corresponder ao que está no genoma.
+Para se certificar que a próxima leitura iniciará no final da leitura
+anterior, é preparado em laboratório o material que sequenciará apenas o
+código genético iniciado com a sobreposição.
+Como essa estratégia envolve uma série de sequenciamentos e pausas para
+a preparação do material, ela é mais lenta do que a estratégia aleatória.
 
 
-\begin{figure}[h] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+
+\subsubsection{Estratégia aleatória}
+
+A estratégia aleatória ou shotgun consiste na realização de várias
+leituras aleatórias do material a ser sequenciado. Quando a região lida
+por dois fragmentos possiu uma intersecção, uma sobreposição entre eles
+é gerado. Com uma amostragem o suficiente, o material genético pode ser
+reconstruído realizando a montagem dos fragmentos de acordo com suas
+sobreposições %\ref{}.
+
+A figura ~\ref{fig02} demonstra uma montagem dos fragmentos.
+
+\begin{figure}[ht]
 \begin{center}
-\includegraphics[scale=.4]{./figuras/montagem2.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
+\includegraphics[scale=.9]{./figuras/shotgun.eps}
 \end{center}
-\caption{Leituras Retiradas do código genético}
-\label{leituras}
+\caption[Estratégia aleatória (aparece na Lista de
+  Figuras)]{Sequenciamento utilizando a estratégia aleatória}
+\label{fig02}
 \end{figure}
 
- As leituras são comparadas
-entre si utilizando as sobreposições entre o final de uma leitura e o
-começo da próxima. A \ref{montagem} demonstra como é realizado uma
-montagem das leituras, as letras ou bases coloridas são as
-sobreposições, após a comparação e montagem, uma única sequencia é
-gerada chamada de contig.
-O objetivo de um montador é utilizar essas leituras para descobrir uma
-sequência contínua pertencente ao código genético, dificilmente é
-possivel obter uma sequencia única que cubra todo o DNA sequenciado pois
-regiões repetidas no genoma, erros nas leituras e até mesmo regiões que
-não foram cobertas pelas leituras impedem que uma sequência única possa
-ser montada.
-
-\begin{figure}[h] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
-\begin{center}
-\includegraphics[scale=.4]{./figuras/montagem1.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
-\end{center}
-\caption{Uma montagem realizada através das leituras}
-\label{montagem}
-\end{figure}
-
-Tomando como exemplo as leituras da \ref{montagem} vamos utilizar um
-algoritmo simples para realizar a montagem. Esse algoritmo é dividido em
-3 partes:
-\begin{enumerate}
-\item Detecção das Sobreposições entre as leituras
-\item Criação do Grafo de Sobreposições
-\item Descobrir o caminho no grafo que utiliza todas as leituras
-\end{enumerate}
-
-\section{Detecção das Sobreposições}
-As leituras são comparadas utilizando as sobreposições entre elas. Para
-encontrar uma sobreposição entre duas leituras de tamanho m, vamos
-comparar as ultimas m-1 bases da primeira sequencia com as primeiras m-1
-bases da segunda, caso não sejam iguais vamos comparar as ultimas m-2
-bases da primeira com as m-2 primeiras bases da segunda leitura. Vamos
-fazer isso até m-x=1, ou seja, até compararmos apenas a ultima base da
-primeira leitura com primeira base da segunda leitura.
-A \ref{sobreposicao1} mostra 3 passos até a sobreposição ser
-encontrada. A sobreposição é marcada com as bases em azul.
-\begin{figure}[h] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
-\begin{center}
-\includegraphics[scale=.4]{./figuras/sopreposicao2.eps} 
-\end{center}
-\caption{Procura de uma sobreposição direta}
-\label{sobreposicao1}
-\end{figure}
-
-Com essa comparação vamos obter uma sobreposição que varia entre m-1 a 1.
-Para cada leitura vamos realizar essa comparação com todas as outras
-leituras de entrada, logo, para um arquivo com n leituras, vamos
-realizar n-1 comarações para a primeira leitura, n-1 comparações para a
-segunda leitura até penultima leitura ser comparada com a ultima.
-
-\begin{figure}[h] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
-\begin{center}
-\includegraphics[scale=.4]{./figuras/sopreposicao1.eps} 
-\end{center}
-\caption{Uma montagem realizada através das leituras}
-\label{sobresicao2}
-\end{figure}
-
-
-\section{Criação do Grafo de Sobreposições}
-
-Utilizando as sobreposições entre as leituras será criado um grafo onde
-cada leitura é um vértice e cada sobreposição é uma aresta entre esses
-dois vértices. A \ref{grafo1} mostra como ficaria o grafo de sobreposições das
-leituras da \ref{leituras}. A sobreposição entre o vértice A e D é 0, logo não
-foi criada uma aresta. As arestas possuem um peso de acordo com a
-sobreposição entre as leituras, logo possuiem um valor entre m-1 e 1.
-As arestas foram coloridas para facilitar a visualização das
-sobreposições, algumas bases nas leituras também foram coloridas com
-esse propósito.
-
-
-\begin{figure}[h] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
-\begin{center}
-\includegraphics[scale=.4]{./figuras/grafo_1.eps} 
-\end{center}
-\caption{Grafo de sobreposições}
-\label{grafo1}
-\end{figure}
-
-
-\section{Caminho no Grafo de Sobreposições}
-Com a criação do grafo realizada, temos que encontrar o caminho que
-passe por todos os vértices e que possua a maior sobreposição
-possivel. Encontramos esse caminho iniciando com a aresta AC, depois
-indo para a aresta CB e BD. Com esse caminho conseguimos gerar um contig
-que cobre aproximadamente 90\% do código genético sequenciado, deixando
-apenas 1 base não sequenciada. Como esse exemplo mostra, alguma parte do
-código genético pode não ter sido coberta por nenhuma leitura, criando
-falhas ou ``gaps'' na nossa montagem.
-
-
-
-\begin{figure}[h] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
-\begin{center}
-\includegraphics[scale=.4]{./figuras/grafo_2.eps}
-\end{center}
-\caption{Caminho no Grafo}
-\label{sobresicao2}
-\end{figure}
-
-
-
-
-
-\chapter{Montagem}
-
-\section{Montagem Tradicional}
-
-Os primeiros montadores como o phrep/phrap trabalhavam com arquivos de
-entrada com 96 leituras com tamanho variando entre 500 a 800
-bases. Esses tamanhos poderiam variar um pouco dependendo do
-sequenciador sendo utilizado, porém a quantidade de leituras não passava
-de algumas centenas. Todas essas leituras devem ser
-então comparadas para se obter o código genético completo do
-organismo. A estratégia de montagem dos programas como o phrap/phrep possuem
-algumas diferenças da estratégia que foi demonstrado no exemplo.
-
-\subsection{Detecção da Sobreposição}
-A detecção da sobreposição é realizada comparando o sufixo de uma
-sequencia com o prefixo da outra sequencia. Numa sequencia sem erros
-essa comparação poder ser realizada diretamente comparando as ultimas n
-bases da primeira sequencia com as primeiras n bases da segunda
-sequencia. Nos sequenciadores de primeira geração a taxa de erros era
-aproximadamente 15\% \[ verificar nas referencias\], o que impossibilitava
-a comparação direta, então a comparação entre duas leituras é realizada
-utilizado o algoritmo de Smith e Waterman. O algoritmo usa programação dinâmica
-para achar a melhor combinação entre as duas leituras. As sobreposições entre as
-leituras podem conter alguns erros que não ocorrem na comparação direta como:
-\begin{itemize}
-\item Deslocamento
-\item 
-
-
-\subsection{Decisão da Sequência Consenso}
-As leituras podem ser comparadas através de suas sobreposições, com elas
-monta-se um grafo em que cada vértice é uma leitura e cada aresta
-se existir uma sobreposição[pevzner] entre elas. O
-algoritmo encontra a melhor sobreposição possível, com essa sobreposição é
-dado um peso a aresta correspondente as duas leituras. O problema de
-montagem é então modelado para o problema do Caminho Hamiltoniano, onde
-cada vértice precisa ser visitado uma única vez. Utilizando esse caminho
-e as sobreposições encontradas é montado uma sequencia única chamada de
-contig. O grafo gerado não é necessariamente conexo, e para cada
-componente conexa é gerada um contig. Após a primeira montagem podem ser
-realizados novos sequenciamentos aleatórios para tentar montar um grafo
-conexo ou sequenciamentos dirigidos podem ser utilizados para ``unir''
-os contigs gerados.
-
-\subsection{Problemas Existentes}
-O problema do Caminho Hamiltoniado é NP-Completo e não existem
-algoritmos eficientes para resolvê-lo. Contudo alguns programas utilizam
-essa estratégia para a montagem dos fragmentos como o PHRAP, CAP, TIGR e
-CELERA. Esses programas contudo só conseguem realizar a montagem para
-sequenciadores de primeira geração onde o número de leituras eram perto
-de 100 e cada leitura possuia entre 400bp e 900bp. Sequenciadores de
-segunda geração como o ABI Solid geram em torno de 10 milhões leituras onde
-cada leitura possui entre 35bp até 50bp\cite{applied}. Devido ao grande
-aumento no número de leituras esses programas não conseguem tratar em
-tempo hábil o problema devido a natureza exponencial da estratégia da montagem.
-
-
-
-
-\section{Montagem Atual}
-A abordagem atual para a montagem de fragmentos se baseia no grafo de
-Bruijn. Em uma maneira simplificada nós podemos visualizar a construção
-de um grafo de Bruijn representando as sequencias como um ``fio'' e as
-regiões repetidas cobertas por uma ``cola'' que ``prende'' elas juntas.
-Nessa representação cada repetição corresponde a uma aresta ao invés de
-uma coleção de vértices.
-
-\subsection{``Grude'' ou K-mers}
-Uma das grandes dificuldades nesse método é a criação desses ``grudes'',
-pois não há como saber com antecedência como as sequencias ``encaixam''
-entre si no código final. Isso é realizado de uma maneira aproximada e
-algoritmos para a correção de erros é utilizada para sanar imperfeições
-na montagem realizadas nessa fase.
-
-
-\begin{figure}[b] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
-\begin{center}
-\includegraphics[scale=.4]{./figuras/grude.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
-\end{center}
-\caption[Implementação dos Kmers ou ``grudes'']{Esquema da implementação dos
-  k-mers ou ``grudes'', retirado de \cite{schatz}}
-\label{kmer}
-\end{figure}
-
-
-\subsection{Grafo de Bruijn}
-O grafo de Bruijn é montado criando vértices que são partes repetidas de
-leituras, ou seja, as leituras são unidas. Dessa maneira, cada repetição
-corresponde a uma aresta ao invés de uma coleção de vértices no grafo
-de sobreposições. O mais importante é que agora o problema de montagem é modelado em encontrar um
-caminho em que cada aresta é visitada apenas uma vez, um problema do
-Caminho Euleriano[Pevzner-2001]. Ao contrário do Caminho Hamiltoniano, o
-problema do Caminho Euleriano possui uma complexidade menor, pois
-existem algoritmos em rodam tem tempo linear. Essa é a fundamental
-diferença entre as duas estratégias. Apesar do grafo de Bruijn possuir
-vantagens em sua complexidade, não é muito claro como encontrar um jeito
-de construí-lo. Os vértices criados através de leituras unidas necessita
-do conhecimento do DNA completo, que não está disponível até a fase
-final.
-
-\subsection{Supercaminho Euleriano}
-O problema do Supercaminho euleriano é definido como "Dado um grafo de Bruijn e uma colação de caminhos neste grafo,
- encontre um caminho Euleriano neste grafo que contenha todos estes caminhos como subcaminhos".
- Dada uma coleção de reads (cadeias) S={s1, s2, ..., sn} de um projeto de sequenciamento e um inteiro l,
- o spectrum de S é o conjunto Sl de todas as l-tuplas dos reads s1, s2, ..., sn.
-Uma (l-1)-tupla v E Sl-1 é ligado por uma aresta direcionada com (l-1)tupla w E Sl-1,
-se Sl contém uma l-tupla onde os primeiros l-1 nucleotídeos coincidem com os ultismos l-1 nucleotídeos de w.
- Cada l-tupla de Sl corresponde a uma aresta no grafo. Se S contem apenas uma sequencia S1 then essa sequencia
- corresponde a um caminho visitando cada aresta uma vez, esse problema é intimimamente relacionado ao problema
- de encontrar o caminho visitando cada aresta do grafo apenas uma vez, um problema do caminho euleriano.
- Nós podemos transformar o problema num caminho euleriano introduzindo multiplicidades
-nas arestas do grafo de bruijn.
-
-
-\subsection{Remoção de Erros}
-Uma abordagem gulosa para o problema da correção de erros seria olhar
-para correções em leituras que dimínuíssem o tabalho Sl por 2l. Esse
-procedimento simples já elimina 85.6\% \cite{pevzner} dos erros nas
-sequencias[pevzner]. Um dos fatos importantes nessa fase não é somente
-tentar corrigir alguns erros, mas também simplificar o grafo de
-bruijn. Dessa maneira poderíamos retirar arestas faltas no grafo e
-tratar desse problema depois que ele estiver pronto. Uma maneira fácil
-de corrigir esses problemas depois seria utilizar uma variação do
-algoritmo de Churchill-Waterman para reconstruir os nucleotídeos duvidosos.
-
-\begin{figure}[b] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
-\begin{center}
-\includegraphics[scale=.5]{./figuras/montagem.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
-\end{center}
-\caption[Exemplos de Monagem]{Ilustrações dos algoritmos de montagem,
-  retirado de \cite{schatz}}
-\label{montagens}
-\end{figure}
-
-
-\chapter{O montador Velvet}
-
-\section{Fases da Montagem}
-O velvet é dividido em 2 executáveis, o velveth e velvetg, respectivamente
-aquele que cria a tabela hash e o outro que cria o grafo. Na primeira
-parte do programa um conjunto de arquivos chamados de Roadmap são
-gerados para a criação do grafo no velvetg. O trabalho foi focado
-na primeira parte do programa, onde mudanças são propostas para tentar melhorar
-a utilização de memória, paralização e tempo de execução.
-
-\section{Criação dos K-mers}
-Os k-mers são os vértices do grafo de Bruijn no Velvet. Os k-mers são
-formados por k-1 bases adjacentes. Para poder criá-los o velvet
-``corta'' as leituras para o tamanho k, aumentando ainda mais o números
-de leituras iniciais. Isso é feito com o intuito de melhorar a
-sobreposição das leituras e adaptá-las ao tamanho fixo da tabela hash,
-já que alguns formatos de entrada não possuem tamanho fixo. Cada nó é unido ao seu inverso,
-que representa a ordem inversa do seu complemento dos nucleotídios. A
-união do nó com seu inverso é chamado bloco. Cada bloco tem dois lados
-distintos, cada lado é ligado por um ``arco'' direcionado. Contudo se um
-arco vai de A pra B, um arco simétrico vai de /B pra /A. Os nós e os
-arcos são mapenado como ``caminhos'' atravessando o grafo.\cite{velvet}
-Cada k-mer no velvet armazena o seu próprio complemento, mesmo que ele
-não esteja presente nas leituras, ou seja, se existir um k-mer com as
-bases GTA o seu complemento CAT vai ser adicionado reversamente no
-k-mer, isso implica que os k-mers só podem ser ímpares para evitar que
-ele seja o seu próprio complemento.
-
-
-\begin{figure}[b] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
-\begin{center}
-\includegraphics[scale=.3]{./figuras/kmer.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
-\end{center}
-\caption[Implementação do Kmer do velvet]{Esquema da implementação do
-  k-mer do velvet, retirado de \cite{velvet}}
-\label{kmer-velvet}
-\end{figure}
-
-\subsection{Tabela de Reads}
-Devido a grande quantidade de memória necessária para armazenar os
-reads, o velvet converte todas as suas leituras para um formato
-econômico em memória chamado tightString. Nesse formato de estrutura de
-dados cada unidade de memória(ex: byte, inteiro) armazena mais de uma
-base e um contador armazena a quantidade de bases dessa sequência.
-Contudo, esse formato de memória é apenas utilizado para armazenamento,
-para uma sequencia ser utilizada ela é antes convertida para o formato
-normal, onde cada base utiliza um byte para então ser utilizada nas
-operações como adição, comparação e inversão.
-
-\subsection{Tabela de Ocorrência de K-mers}
-A tabela de Ocorrencia de K-mers é uma tabela hash em que algumas bases
-da primeira sequencia do k-mer é utilizada como chave, tendo assim uma
-boa dispersão. Cada entrada na tabela é composta por uma ocorrência onde
-a estrutura de dados armazena o ID, a posição, o ofsset e o
-kmer. A tabela também possui os ``bits de aceleração'' que organizam as
-chaves afim de melhorar as buscas subsequentes.
-
-
-\section{Grafo de Bruijn}
-É realizado uma hash das leituras de acordo com o tamanho definido pelos
-k-mers. A variável k é limitada pelo tamanho da leitura sendo
-utilizada. K-mers pequenos aumentam a conectividade do grapo ao mesmo
-tempo aumentam a chance de repetições ambíguas no grafo. Logo é
-necessário um equilibrio entre sensibilidade e especificidade
-determinado pelo k(cf. Methods).
-Para cada k-mers encontrado no conjunto de leituras, a tabela hash
-armazena o ID da primeira leitura encontrada para aquele k-mer e a sua
-posição encontrada dentro da leitura. Cada k-mer é armazenado
-simultaneamente com o seu complemento reverso. Para garantir que cada
-k-mer não possa ser o seu próprio complemento reverso, k tem que ser um
-número impar. Essa primeira leitura permite que cada leitura seja
-reescrita como um conjunto de k-mers combinados com suas sobreposições
-na tabela hash. Essa representação de leituras é chamada de ``roadmap''.
-O ``roadmap'' é utilizado para armazenar os k-mers encontrados e outros
-gerados durante a primeira execução. A partir desses k-mers o grafo de
-bruijn é criado. Cada k-mers representa um vértice no grafo e a cada
-k-mer subsequente é criado uma nova aresta ou é incrementada a já existente.
-
-\subsection{Remoção de Erros}
-A correção de erros é realizada depois que o grafo é formado para que
-seja possível operações simultâneas no conjunto de leituras. Uma
-abordagem simplista seria remover todos os nós com cobertura baixa,
-contudo isso também eliminaria variações biológicas legítimas que tenham
-uma representação baixa. O Velvet utiliza métodos que focam
-características topológicas. Informações errôneas geram três tipos de
-estruturas: ``tips'' em função dos erros nos arcos do reads, ``bulges''
-devido a leituras erradas ou a ``tips'' próximas que estejam conectadas,
-e conexões erradas devido a defeitos de clonagem. Os três erros são
-removidos consecutivamente. Um ``tip'' é uma sequencia de nós em que
-estão desconectados no final, remover esse tipo de situação é uma tarefa
-árdua. Esse tipo de informação pode ser descartada já que apenas
-informações locais são perdidas e nenhuma conectividade é
-comprometida. Contudo algumas restrições devem ser realizadas para
-diferenciar aquelas que são legítimas e aquelas causadas por ``gaps'' no
-sequenciamento, dois fatores são utilizados: tamanho e contagem. Se o
-``tip'' for menor que 2k bases ele é removido, esse tramanho arbitrário
-é utilizado porque ele é maior que o tamanho do k-mer de leituras individuais.
-
-
-\begin{figure}[b] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
-\begin{center}
-\includegraphics[scale=.3]{./figuras/tourbus.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
-\end{center}
-\caption[Correção de erros no velvet]{Esquema da correção de bolhas no velvet, retirado de \cite{velvet}}
-\label{erros-velvet}
-\end{figure}
-
-
-%\chapter{Falha de segurança no DNS}
-%Em Julho de 2008 foi anunciado pelo \textit{CERT} (\textit{Computer Emergency Readiness Team} -- Time de prontidão a emergências computacionais) que o pesquisador de segurança Dan Kaminsky havia descoberto uma falha fundamental no protocolo do DNS, definido nos RFC's 1034 \cite{rfc1034} e 1035 \cite{rfc1035}.
-
-
-\chapter{Implementações e Mudanças Realizadas no Velvet}
-
-
-
-\section{Utilização de uma árvore de prefixos}
-Uma das primeiras implementações testadas foi uma árvore de prefixos com
-o objetivo de diminuir o tempo para encontrar o nó com l-1 bases
-adjacentes. Nos experimentos realizados, para um número pequeno de
-leituras o tempo para encontrar o nó adjacente foi pequeno, dependendo
-apenas do tamanho da árvore, contundo, a quantidade de memória
-necessária para armazenar essa árvore foi muito grande, considerando que
-cada base ou conjunto de bases poderia criar um ponteiro na árvore, ela
-crescia aproximadamente um valor exponencial ao tamanho de cada leitura,
-a tornando inviável para a maioria das aplicações.
-
-\section{Implementação Enxuta dos Reads}
-A implementação das leituras é realizada de uma forma a economizar o
-máximo de memória. Cada base de uma leitura utiliza apenas 2 bits por
-base, num total de 4 nucleotídeos por byte. Utilizando 4 vezes menos
-memória do que armazenar um nucleotídio por byte, formando um bloco com
-4 bases.
-Cada sequencia é armazenada com um vetor de tamanho n, onde o número de
-nucleotídios é no máximo 4n. Dentro da estrutura é armazenado o
-tabanho do vetor e qual a posição de término do ultimo nucleotídio da
-ultima posição do vetor. A implementação é muito parecida com o
-tightString do velvet, contudo algumas pequenas diferenças visam a
-mudança de objetivo da utilização. No velvet o tightString é utilizado
-apenas como armazenamento e não manipulação. Várias rotinhas de
-manipulação foram implementadas, como adição, comparação e o complemento
-foram realizadas. O complemento é o caso mais simples onde os bits de cada
-bloco são invertidas chegando ao resultado. Na adição de duas sequencias
-mais cálculos são necessários pois o cada bloco resultado pode vir de
-dois blocos adjacentes deslocados para direita ou para esquerda
-dependendo do deslocamento e quantas bases estão armazenadas no último
-bloco da primeira sequencia. A comparação pode ser realizada
-base-a-base, onde novamente vários calculos de deslocamento e máscara de
-bits são necessárias, tornando a comparação de um grande número de
-sequencias nos testes realizados muito mais caro do que no formato onde
-casa base ocupa um byte.
-
-
-\section{Criação de ``grudes'' reduzida}
-A busca das sobreposições é realizada comparando bloco a bloco as
-sequências. Ao invés de k-1 pares adjacentes, as sequencias são ligadas
-comparando bloco a bloco até que uma quantidade mínima de blocos seja
-igual. Após os testes realizados mostrando a ineficiência da comparação
-base-a-base no formato reduzido, uma nova abordagem foi realizada
-comparando os blocos ao invés das base. A cada par de sequencias o
-primeiro bloco é procurado na sequencia seguinte, quando encontrado o
-proximo bloco em cada sequencia é comparado até o proximo bloco em que
-há uma diferença. Se essa comparação obtiver um número mínimo de blocos
-iguais um ``grude'' é realizado, ligado a primeira sequencia até a
-segunda armazenando o ID da segunda sequencia na primeira e modificando
-um dos bytes de término.
-
-\begin{figure}[p] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
-\begin{center}
-\includegraphics[scale=.7]{./figuras/busca1.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
-\end{center}
-\caption[Sobreposição de Sequencias]{Esquema da sobreposição de sequencias}
-\label{sobreposicao}
-\end{figure}
-
-\begin{figure}[b] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
-\begin{center}
-\includegraphics[scale=.7]{./figuras/para3.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
-\end{center}
-\caption[Criação de ``grudes'']{Esquema da criação de ``grudes''}
-\label{grude}
-\end{figure}
-
-\begin{figure}[b] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
-\begin{center}
-\includegraphics[scale=.7]{./figuras/para6.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
-\end{center}
-\caption[Criação de ``grudes'' em paralelo]{Esquema da criação de
-  ``grudes'' em paralelo}
-\label{grude1}
-\end{figure}
-
-\section{Novas Idéias}
-Uma das propostas utilizando essa implementação reduzida seria criar um
-algoritmo para a correção de erros gerados na criação de ``grudes''
-reduzida, pois apesar da comparação ter o seu tempo reduzido algumas não
-são realizadas devida a comparação bloca-a-bloco. A comparação
-blobo-a-bloco força a criação de ``tips'' no grafo, onde o velvet tem
-por padrão descartá-las se não possuirem um tamanho mínimo. Ao invés de
-utilizar o velvet para corrigir os erros, um outro programa teria que
-utilizar um algoritmo modificado de Churchill-Waterman(23) nos ``tips''
-e combiná-los. Uma outra implementação que poderia ser realizada com os
-``grudes'' reduzido seria ao invés de utilizar a tabela hash para
-indexação dos k-mers utilizar uma árvore de prefixos de blocos na
-indexação, com os blocos a altura da árvore diminuiria consideravelmente
-e poderia ser utilizada, contudo uma abordagem mista que seja facilmente
-paralelizável seja mais interessante.
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Modelo para escrever TCCs, dissertações e teses utilizando LaTeX, ABNTeX e BibTeX
-% Autor/E-Mail: Robinson Alves Lemos/contato@robinson.mat.br/robinson.a.l@bol.com.br
-% Data: 19/04/2008 
-% Colaboradore(s)/E-Mail(s):
-% Caso queira colaborar, entre em contato pelo e-mail e informe alterações que realizou.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+A estratégia aleatória possui a vantagem de sequenciar mais rápido o
+material genético, pois cada leitura pode ser gerada em paralelo com as
+utras, não havendo a necessidade de uma pausa para cada sequenciamento.
+Contudo a utilização dessa estratégia surge o problema computacional
+da montagem dos fragmentos sequenciados que vamos definir a seguir.
+
+Uma sequência \emph{s} de DNA será uma string sobre o alfabeto
+de quatro letras \{a,c,g,t\}, cada letra corresponde ao primeiro caractere
+do nome químico de cada nucleotídio e o código genético a ser sequenciado a
+superstring \emph{L}. O problema da montagem será alinhar as
+sequências \emph{s} para obter a superstring \emph{L} utilizando as sobreposições entre as leituras.
+
+Um problema parecido com o da montagem é o \emph{menor superstring comum} onde dado uma coleção de
+strings queremos encontrar a menor string \emph{S}, chamada superstring, tal que cada membro da
+coleção é uma substring de \emph{S}. Duas diferenças no conjunto de entrada muda a complexidade do problema,
+são elas a probabilidade de erro das bases e o não conhecimento da orientação das leituras.
+
+Cada string da coleção de entrada pode possuir erros como: a falta de um caractere, a adição de um
+caractere não existente ou a troca de um caractere por outro. Essas diferenças são denominadas respectivamente:
+subtração, adição e substituição.
+
+Outra dificuldade é o não conhecimento da orientação da leitura. O complemento de uma leitura é dada uma
+string \emph{ACCTGA} tomamos o seu inverso \emph{AGTCCA} e trocamos cada caractere pelo seu complemento:
+a=t, c=g, g=c, t=a. Ficando assim \emph{TCAGGT}.
+
+Segundo \cite{1}:
+
+Definição. O problema de reconstrução da sequência de DNA (RECONSTRUCT) é,
+dado uma coleção \emph{F} de sequências fragmentadas e uma taxa de erro
+0 < \emph{e} < 1, achar a menor sequência \emph{S} tal que para todo fragmento
+\emph{A} E  \emph{F} existe uma substring \emph{B} de \emph{S} tal que:
+
+min(d(A,B),d(!A,B)) <= \emph{e} |\emph{A}|.
+
+
+\section{Organização do conjunto de leituras}
+
+
+
+Primeiramente vamos nos concentrar em definir o cenário do caso ideal, onde
+o problema da montagem consiste em construir o genoma de um organismo
+através da leituras obtida pelos sequenciadores. Os sequenciadores
+produzem apenas pedaços do genoma e queremos através desses pedaços
+conseguir descobrir o genoma completo do organismo sequenciado.
+
+Contudo isso normalmente não é possível, através dos dados produzidos pelos
+sequenciadores conseguimos chegar a uma aproximação do genoma do
+organismo. Essa aproximação consiste em construir pedaços maiores do
+genoma utilizando as leituras obtidas. Um conjunto de leituras é
+organizado de tal forma que reflete um pedaço contínuo do genoma, esse conjunto de leituras nomeia-se contig.
+
+Uma abordagem que utilizaremos para o problema é abstrair o significado biológico da montagem e
+concentrar apenas no problema genérico.
+
+Considerando um alfabeto que possui apenas as letras A,C,G,T.
+O genoma do organismo consiste numa string sobre esse alfabeto. As
+leituras são substrings do genoma. E através dessas
+leituras queremos gerar os contigs que é um conjunto de leituras
+alinhadas de tal maneira que formam uma sequência contínua pertencente ao genoma.
+
+Uma analogia para o problema da montagem é considerarmos as leituras
+como peças de um quebra cabeça que queremos montar. Devemos encaixar
+todas essas peças afim de achar a solução do problema. A principal
+diferença está no fato de poder não existir uma solução perfeita, ou
+seja, pode ser que tenham leituras faltando ou sobrando e dessa forma
+o quebra-cabeça nunca estará completo.
+
+Para conseguimos montar o nosso quebra-cabeças devemos descobrir como
+as peças se encaixam, para isso vamos realizar o emparalhamento par
+a par de cada sequência para definir quanto cada leitura é parecida com
+a outra encontrando a maior subsequencia comum entre os dois.
+
+%Longest common subsequence problem
+
+
+\section{Alinhamento de sequências}
+
+O alinhamento consiste em comparar duas ou mais sequências
+procurando por uma série ou padrões de letras que estão na mesma ordem
+entre nas sequências.
+Podemos ``desenhar'' um alinhamento escrevendo uma sequência em cada
+linha, e após isso, as letras idênticas são colocadas na mesma coluna,
+indicando através de uma linha entre elas. As letras diferentes podem
+ser colocadas na mesma coluna ou deixar um espaço caso necessário.
+
+Existem dois tipos de alinhamentos: o global e o local. Exemplificados
+pela figura.
+
+No alinhamento global de sequências queremos que o maior número possível
+de letras em cada leitura sejam alinhados até o final. Sequências que
+são bem similares e de tamanhos parecidos são bons candidatos para esse
+tipo de alinhamento. No alinhamento local regiões muito similares entre
+as leituras são alinhadas.
+
+
+
+\section{Alinhamento de sequências utilizando palavras}
+
+Quando não estamos procurando apenas a solução ótima para o alinhamento
+entre sequências podemos utilizar um algoritmo mais rápido para achar
+uma solução aproximada ou satisfatória para a comparação.
+
+Um método para comparar rapidamente leituras é realizar uma busca por
+ palavras ou k-tuplas dentro de uma leitura. De uma maneira similiar
+utilizado pelo programa FASTA, vamos procurar por palavras iguais dentro
+das leituras, certificando assim que K bases contínuas são iguais.
+
+
+Exemplo:
+
+Para realizarmos o alinhamento entre as duas sequências devemos primeiro
+dividir cada leitura em palavras de tamanho K. Por exemplo na leitura
+ACCTGCCATA que tem 10 bases, vamos utilizar uma palavra de tamanho
+8. Assim a leitura gerará três palavras: ACCTGCCA, CCTGCCAT e
+CTGCCATA. Faremos a mesma coisa com a segunda leitura CCTGCCATAG gerando
+então as palavras: CCTGCCAT, CTGCCATA e TGCCATAG. Agora comparando
+diretamente as palavras entre si, percebemos que há palavras em comum
+entre ambas as leituras: CCTGCCAT e CTGCCATA . Essas duas palavras
+representam 9 entre as 10 bases de cada leitura, ou seja, 90\% de
+similaridade. E podemos alinhar essas duas leituras utilizando as bases
+em comum.
+
+%/figura
+
+Apesar desse algoritmo poder não encontrar o alinhamento ótimo, ele é
+mais simples que algoritmo de programação dinâmia de Smith-Waterman.
+Esse algoritmo pode ser implementado usando tabelas hash, e com isso o
+número de comparações aumenta linearmente em proporção ao tamanho médio
+das leituras. As comparações da programação dinâmica por outro lado
+aumenta entre oquadrado e o cubo do tamanho médio das leituras.
+
+O tamanho da palavra é determinado pelo usuário. Esse parâmetro deve ser
+cuidadosamente escolhido, se o tamanho da palavra for muito próxima do
+tamanho da leitura, será mais difícil obter um alinhamento. No caso
+contrário se o tamanho da palavra for muito diferente do tamanho da
+leitura, e a busca pode retornar um número muito alto de leituras,
+incluindo as não possuem pouca similaridade.
+
+
+
+ como utilizar os alinhamentos para produzir um contig
+[ definir o problema da montagem de forma geral ]
+
+Voltando a analogia com o quebra-cabeças, utilizando o alinhamento,
+sabemos como comparar as leituras e entender como as peças se
+``encaixam''.  O último passo é utilizar as comparações para alinhar
+todas as leituras afim de criar um ou mais contigs.
+Uma representação desses alinhamentos pode ser feito criando um grafo,
+onde cada leitura é um nó e os alinhamentos são as arestas. Para
+realizar uma montagem, vamos todas as leituras
+apenas uma vez com o melhor alinhamento possível par a par.
+Modelando o problema no grafo, queremos achar um caminho nele, passando
+por cada nó apenas uma vez. Esse problema é descrito como encontrar o
+caminho hamiltoniano no grafo.
+
+
+\chapter{Montagem nos Sequenciadores Tradicionais}
+
+Vamos definir como sequenciadores tradicionais todos aqueles que geram
+leituras acima de 500 bp e com o número de leituras de no máximo 1000.
+Com essas limitações é possível utilizar a estratégia descrita a seguir
+para se realizar a montagem do genoma:
+
+1. Comparar par a par as leituras utilizando o algoritmo guloso.
+2. Criar um grafo com arestas de peso relativos à comparação.
+3. Achar o caminho halmiltoniano no grafo.
+
+O sequenciamento genético tem uma grande importância na biologia
+moderna. O Projeto do Genoma Humano é um exemplo da importância da
+tecnologia de sequenciamento, as informações do sequenciamento levam a
+compreensão de doenças relacionadas a variação genética, gerando impacto
+na biologia quanto também na medicina.
+[ mostrar os métodos e os algoritmos utilizados pelos montadores
+  tracidionais como o phred/phrap ]
+
+\chapter{Montagem nos Sequenciadores de Nova Geração}
+
+[ mostrar como realizar a montagem para os sequenciadores de nova
+  geração sem a utilização do grafo de bruijn:
+  falar sobre os montadores desse estilo: VCAKE, SOAPDenovo]
+
+%\chapter{Montagem nos Sequenciadores de Nova Geração utilizando grafo de
+%  bruijn}
+
+%[ mostrar como realizar a montagem utilizando o grafo de bruijn e falar
+%  sobre alguns montadores desse estilo: abyss, velvet ]
+
+%\chapter{O algoritmo Pebble e Montador Velvet}
+
+%[ falar com mais detalhes sobre o velvet e os algoritmos utilizados por
+%  ele. Colocar alguns datlhes da implementação aqui ]
 

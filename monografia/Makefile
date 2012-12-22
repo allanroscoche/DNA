@@ -2,7 +2,7 @@ FILE=monografia
 LATEX=${FILE}.tex
 DVI=${FILE}.dvi
 PS=${FILE}.ps
-PDF=DNA.pdf
+PDF=Montagem.pdf
 
 forsure: all
 
