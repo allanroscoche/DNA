@@ -1,263 +1,170 @@
+\chapter{Sequenciamento Genético}
+O sequenciamento genético tem como objetivo descobrir a sequência completa de DNA do genoma de um organismo.
+%Para a realização do sequenciamento processos químicos são utilizados para a identificação dos nucleotídios da sequência.
+%Agressive Assembly of pyrosequencing reads with mates
+Pequenas strings de bases nucléicas geradas pelo sequenciador chamadas leituras.
+Os sequenciadores são máquinas que automatizam os processos químicos utilizados para a identificação dos nucleotídios das leituras.
+Além das diferenças no funcionamento interno, cada sequenciador difere na quantidade e na qualidade das leituras produzidas.
 
-\chapter{O problema da montagem}
+As leituras possuem um tamanho determinado pela tecnologia utilizada no sequenciador. Várias leituras são necessárias para cobrir todo o genoma de um organismo.
+%Todo método de sequenciamento passa pela fase de clonagem, nesta fase um organismo vetor é utilizado para se obter as leituras, por causa disso, o tamanho das leituras é limitado pela capacidade do organismo vetor.
 
-O problema da montagem surgiu com o desenvolvimento do sequênciamento
-genético, onde novas estratégias foram adotadas e com elas, processos
-mecânicos e químicos puderam ser substituídos por soluções computacionais.
-Para entender o surgimento do problema, é necessário também a
-compreensão de como sequenciamento é realizado, e quais são suas limitações.
-
-\section{Estratégias de sequenciamento}
-
-Sequenciar um genoma não é uma tarefa simples e envolve
-múltiplos processos: clonagem do DNA, mapeamento físico,
-subclonagem, sequenciamento e análise da informação. E em muitos desses
-processos a quantidade de informação que pode ser gerada de cada vez é
-limitada. Com isso, o sequenciamento de um genoma é realizado lendo um
-pedaço de cada vez. Os pedaços lidos são utilizados para descobrir regiões
-genéticas maiores, como por exemplo os genes.
-
-As estratégias utilizadas acabem se classificado em duas categorias: a direcionada e aleatória.
-
-\subsubsection{Estratégia direcionada}
-Essa estratégia permite a análise direta e sequencial de um grande
-fragmento de DNA do início ao fim. A técnica consiste em a partir de uma
-leitura inicial, ir caminhando pela sequência genética lendo um pedaço
-adjacente por vez até chegar ao final do código sequenciado. Para a
-realização dessa estratégia, a próxima leitura começará no final da
-anterior, utilizando a sobreposição entre as duas para certificar de que
-se trata da continuação da leitura anterior.
+%Quando o sequenciamento é realizado sequencialmente, isto é, cada sequência é obtida uma após a outra, o método é chamado sequenciamento direcinado, e quando várias sequências são produzidas paralelamente o método de sequenciamento é chamado aleatório ou shotgun.
 
 
-Podemos observar na figura ~\ref{fig01} as sobreposições das leituras e sentido do sequenciamento.
+\section{Método Shotgun de sequenciamento}
+O método shotgun de sequenciamento consiste em obter várias sequências aleatórias do genoma paralelamente.
+Assim várias leituras são obtidas de partes aleatórias do genoma e para se obter o genome a ser sequenciado é necessário ser realizada a montagem dessas leituras. A montagem é um processo computacional onde as sequências são comparadas entre si e atraves dessas comparações é gerado uma aproximação do genoma sequênciado. Essa aproximação é formada por um conjunto de strings chamados contigs e a ausencia de strings chamados gaps.
+
+\section{Next Generation Sequencers - NGS}
+%Evaluation of next generation sequencing platforms for population targeted sequencing studies
+Alguns dos NGSs, incluindo Roche 454, Illumina GA, e ABI SOLiD, são capazes de gerar de três a quatro ordens de magnitude mais leituras
+e são consideravelmente mais baratas que o método Sanger na plataforma ABI 3730xL.
+% [2-4].
+%High-quality draft assemblies of mammalian genomes from massively parallel sequence data
+A princípio, isso deveria tornar possível a diminuição drástica do custo de gerar a montagem de genomas. Na prática, entretanto, isso tem sido difícil porque as novas tecnologias produzem leituras de até 100 bases de tamanho( comparando com $>$ 700 bases da tecnologia Sanger). Esse leituras curtas são também menos confiáveis. Por ambos os motivos, esses dados são mais difíceis de montar numa sequencia contínua e conectada.
+
+Devido a essas características, para o sequenciamento 'de novo' utilizando NGS's é utilizada uma grande cobertura do genoma, entre 30x e 600x para compensar esses problemas.
+
+%B. Ewing, P. Green, Base-calling of automated sequencer traces using phred.
+Todos esses novos sequenciadores produzem além da letra que representa a molécula de DNA, o valor numérico representando a qualidade para cada base.
+%All sequencers produce observations of the target DNA molecule in the form of reads: sequences of single-letter base calls plus a numeric quality value (QV) for each base call.
+
+%Assembly Algoritms for next-generation data
+%Although QVs offer extra information, their use generally increases a program's CPU and RAM requirements. Only some of the NGS assembly software exploits QVs.
+Apesar desse número ser uma informação extra, isso normalmente aumenta os requerimentos de CPU e RAM dos programas. Apenas alguns montadores NGS exploram essa informação.
+
+\section{ABI Solid}
+Uma das diferenças da plataforma SOLiD dentre os outros sequenciadores é a codificação de duas bases em que cada ponto representa o encontro de duas bases, logo, cada base é verificada duas vezes.
+Devido a essa característica os dados não são gravados como bases mas sim em 'color space', onde cada cor representa duas bases adjacentes.
+Uma desvantagem na utilização do 'color space' é que a conversão para bases nucléicas é que os erros são amplificados durante a tradução, por isso, a manipulação dessas sequências são realizadas nesse formato.
+
+
+\chapter{Montagem das leituras}
+
+
+O problema da montagem é, através das leituras obtidas pelo sequenciador, obter o genoma sendo sequenciado.
+As naiores dificuldades na montagem está nos erros encontrados nas leituras, a detecção regiões repetitivas e perceber a falta de cobertura para alguma região do genoma.
+
+Segundo \cite{Algorithms1995} o problema de montagem pode ser modelado como o problema de reconstrução de string.
+
+
+\section{Montagem Tradicional}
+
+A montagem tradicional consiste em achar um alinhamento entre as leituras e através de um grafo de sobreposição realizar a montagem.
+
+Para se encontrar o melhor alinhamento local entre duas string é utilizado o algoritmo de smith-waterman \cite{}.
+
+No grafo sobreposições cada nó representa uma leitura e cada aresta representa uma sobreposição entre duas leituras.
+Um peso é atribuído a cara aresta de acordo com a qualidade do alinhamento.
+Para realizarmos a montagem devemos achar um caminho halmitoniano nesse grafo, o que é um problema NP-completo.
+
+\section{Montagem no NGS}
+Contudo devido a grande quantidade de leituras que um NGS produz é necessária uma outra abordagem para a comparação das leituras. Isso é realizado dividindo as leituras em pedaços menores e realizando uma comparação direta desse pedaços.
+Esses pedaços são chamados kmers e são utilizados para a criação do grafo de bruijn.
+
+%Esses pedaços são chamados de k-mers e são utilizados nas duas estratégias a seguir:
+%\subsection{read expansion}
+%No read expansion, após dividirmos as leituras em tamanhos menores é utilizada uma estrutura de dados para indexar esses pedaçõs e realizando buscas nessa estrutura procuramos por outros pedaços que possam ser alinhados e, desse modo, expandimos uma leitura adicionando novas bases encontradas nas buscas. O montador SSAKE utiliza essa estratégia.
+%\subsection{grafo de bruijn}
+No grafo de bruijn cada kmer é um nó e cada aresta é uma relação de igualdade de $k-1$ letras.
+Para uma representação mais simples é utilizada uma versão condensada do grafo como visto na \ref{bruijn}.
+Em $A$ é gerado o grafo de bruijn da leitura e em $B$ o grafo de convertido para a forma condensada.
 
 \begin{figure}[ht] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
 \begin{center}
-\includegraphics[scale=.9]{./figuras/direcionado.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
+\includegraphics[scale=.5]{./figuras/bruijn2.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medid), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
 \end{center}
  
-\caption[Estratégia direcionada (aparece na Lista de
-  Figuras)]{Sequenciamento utilizando a estratégia direcionada}
-\label{fig01}
+\caption[Grafo de Bruijn]{Exemplo de um grafo de bruijn gerado por uma sequência de bases}
+\label{bruijn}
 \end{figure}
 
-Para se certificar que a próxima leitura iniciará no final da leitura
-anterior, é preparado em laboratório o material que sequenciará apenas o
-código genético iniciado com a sobreposição.
-Como essa estratégia envolve uma série de sequenciamentos e pausas para
-a preparação do material, ela é mais lenta do que a estratégia aleatória.
 
+Após a contrução do de bruijn, é gerado um supercaminho euleriano nesse grafo, e com isso realizamos a montagem das leituras.
+Apesar desse algoritmo também utilizar um grafo como na montagme tradicional, o problema do supercaminho euleriano possui um algoritmo de tempo polinomial. Tornando possível a sua utilização por montadores NGS.
 
+\section{Correção de Erros}
+A diferenciação principal dos montadores NGS está nos algoritmos utilizados para o tratamento de erros do sequenciamento.
+Aa correção de erros pode ser feito em duas fases: uma após a construção do grafo, como é o caso do algoritmo Pebble do velvet, ou antes da indexação dos kmers.
 
-\subsubsection{Estratégia aleatória}
+\chapter{Pipeline Solid}
 
-A estratégia aleatória ou shotgun consiste na realização de várias
-leituras aleatórias do material a ser sequenciado. Quando a região lida
-por dois fragmentos possiu uma intersecção, uma sobreposição entre eles
-é gerado. Com uma amostragem o suficiente, o material genético pode ser
-reconstruído realizando a montagem dos fragmentos de acordo com suas
-sobreposições %\ref{}.
+Esse capítulo descreve o funcionamento do pipeline para o sequenciamento 'de novo' utilizando a plataforma SOLiD.
+Devido ao sequenciador solid gerar os seus dados em 'color space', o montador deve ser capaz de manipular os dados nesse formato, e com isso o pipeline se faz necessário para a montagem \cite{Biosystems}.
 
-A figura ~\ref{fig02} demonstra uma montagem dos fragmentos.
+%\section{pipeline}
+Podemos observar na figura ~\ref{pipeline} o pipeline denovo.
 
-\begin{figure}[ht]
+\begin{figure}[ht] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
 \begin{center}
-\includegraphics[scale=.9]{./figuras/shotgun.eps}
+\includegraphics[scale=.4]{./figuras/pipeline.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medida), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
 \end{center}
-\caption[Estratégia aleatória (aparece na Lista de
-  Figuras)]{Sequenciamento utilizando a estratégia aleatória}
-\label{fig02}
+ 
+\caption[Pipeline SOLiD denovo (aparece na Lista de
+  Figuras)]{Pipeline Utilizado pela plataforma SOLiD}
+\label{pipeline}
 \end{figure}
 
-A estratégia aleatória possui a vantagem de sequenciar mais rápido o
-material genético, pois cada leitura pode ser gerada em paralelo com as
-utras, não havendo a necessidade de uma pausa para cada sequenciamento.
-Contudo a utilização dessa estratégia surge o problema computacional
-da montagem dos fragmentos sequenciados que vamos definir a seguir.
-
-Uma sequência \emph{s} de DNA será uma string sobre o alfabeto
-de quatro letras \{a,c,g,t\}, cada letra corresponde ao primeiro caractere
-do nome químico de cada nucleotídio e o código genético a ser sequenciado a
-superstring \emph{L}. O problema da montagem será alinhar as
-sequências \emph{s} para obter a superstring \emph{L} utilizando as sobreposições entre as leituras.
-
-Um problema parecido com o da montagem é o \emph{menor superstring comum} onde dado uma coleção de
-strings queremos encontrar a menor string \emph{S}, chamada superstring, tal que cada membro da
-coleção é uma substring de \emph{S}. Duas diferenças no conjunto de entrada muda a complexidade do problema,
-são elas a probabilidade de erro das bases e o não conhecimento da orientação das leituras.
-
-Cada string da coleção de entrada pode possuir erros como: a falta de um caractere, a adição de um
-caractere não existente ou a troca de um caractere por outro. Essas diferenças são denominadas respectivamente:
-subtração, adição e substituição.
-
-Outra dificuldade é o não conhecimento da orientação da leitura. O complemento de uma leitura é dada uma
-string \emph{ACCTGA} tomamos o seu inverso \emph{AGTCCA} e trocamos cada caractere pelo seu complemento:
-a=t, c=g, g=c, t=a. Ficando assim \emph{TCAGGT}.
-
-Segundo \cite{1}:
-
-Definição. O problema de reconstrução da sequência de DNA (RECONSTRUCT) é,
-dado uma coleção \emph{F} de sequências fragmentadas e uma taxa de erro
-0 < \emph{e} < 1, achar a menor sequência \emph{S} tal que para todo fragmento
-\emph{A} E  \emph{F} existe uma substring \emph{B} de \emph{S} tal que:
-
-min(d(A,B),d(!A,B)) <= \emph{e} |\emph{A}|.
+O pipeline constituído por uma série de programas que preparam os dados para um montador capaz de realizar a montagem em 'color space' e além disso realizam outros processos para melhorar a qualidade da montagem.
+Neste capítulo não vamos mostrar todos os softwares, apenas aqueles que foram necessários ao estudo.
 
 
-\section{Organização do conjunto de leituras}
+\section{saet}
+O SOLiD Accuracy Enhancement Tool(SAET) é usado para a correção de erros pré-montagem.
+O programa gera todos os kmers presente nas leituras e seleciona aqueles que possuem uma cobertura mínima.
+Infelizmente o código-fonte é fechado e todo o conhecimento sobre o programa foi obtido por sua documentação.
+
+\section{preprocessor}
+Neste estágio, as leituras são convertidas do formato 'color space' para o formato 'pseudobases'.
+Nesse novo formato a primeira base é retirada e cada cor é convertido para uma letra correspondente.
+As letras utilizadas nesse formato não representam as bases nucléicas das leituras, apenas as cores do 'colorspace', a transformação para as bases é realizada apenas na fase final do pipeline.
+
+\section{Velvet}
+O Velvet é um conjunto de algoritmos que utilizam grafos de Bruijn para a realização da montagem das leituras, eliminando erros e resolvendo repetições \cite{Zerbino2008}.
 
 
+O software é dividido em dois executáveis: o velveth e o velvetg.
 
-Primeiramente vamos nos concentrar em definir o cenário do caso ideal, onde
-o problema da montagem consiste em construir o genoma de um organismo
-através da leituras obtida pelos sequenciadores. Os sequenciadores
-produzem apenas pedaços do genoma e queremos através desses pedaços
-conseguir descobrir o genoma completo do organismo sequenciado.
+%No velvet, cada nó do grafo é ligado ao seu complemento genético formando assim um bloco.
 
-Contudo isso normalmente não é possível, através dos dados produzidos pelos
-sequenciadores conseguimos chegar a uma aproximação do genoma do
-organismo. Essa aproximação consiste em construir pedaços maiores do
-genoma utilizando as leituras obtidas. Um conjunto de leituras é
-organizado de tal forma que reflete um pedaço contínuo do genoma, esse conjunto de leituras nomeia-se contig.
+\subsection{velveth}
+No velveth ocorre a fase de criação e indexação dos kmers, o arquivo de leituras é carregado na memória e os kmers são gerados.
+A estrutura de dados utilizada para o armazenamento dos kmers é uma tabela hash onde cada elemento é uma árvore splay de kmers.
+Essa tabela então é gravada no arquivo Roadmap.
 
-Uma abordagem que utilizaremos para o problema é abstrair o significado biológico da montagem e
-concentrar apenas no problema genérico.
+%Na versão paralela do velveth utilizando o OpenMP a escrita no arquivo Roadmap depende do escalonamento do processador, tornando o programa velvet não determinístico.
 
-Considerando um alfabeto que possui apenas as letras A,C,G,T.
-O genoma do organismo consiste numa string sobre esse alfabeto. As
-leituras são substrings do genoma. E através dessas
-leituras queremos gerar os contigs que é um conjunto de leituras
-alinhadas de tal maneira que formam uma sequência contínua pertencente ao genoma.
+\subsection{velvetg}
 
-Uma analogia para o problema da montagem é considerarmos as leituras
-como peças de um quebra cabeça que queremos montar. Devemos encaixar
-todas essas peças afim de achar a solução do problema. A principal
-diferença está no fato de poder não existir uma solução perfeita, ou
-seja, pode ser que tenham leituras faltando ou sobrando e dessa forma
-o quebra-cabeça nunca estará completo.
+No grafo de bruijn utilizado pelo velvet, cada nó no grafo é uma série de kmers sobrepostos. Kmers adjacentes sobrepõe-se k-1 nucleotídios e a informação remanescente de cada kmer é sua última base. Esse conjunto de bases é chamado sequência. Cada nó no grafo é anexado ao nó reflexo que representa o seu complemento reverso das bases nucléicas dos kmers. A união desses dois nós é chamado bloco e pode ser observado na fig ~\ref{bruijn-velvet}.
 
-Para conseguimos montar o nosso quebra-cabeças devemos descobrir como
-as peças se encaixam, para isso vamos realizar o emparalhamento par
-a par de cada sequência para definir quanto cada leitura é parecida com
-a outra encontrando a maior subsequencia comum entre os dois.
+\begin{figure}[ht] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+\begin{center}
+\includegraphics[scale=.5]{./figuras/bruijn_velvet.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medid), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
+\end{center}
+ 
+\caption[Nós do grafo de bruijn utilizado no velvet]{Exemplo de nós do grafo de bruijn gerado pelo velvet}
+\label{bruijn-velvet}
+\end{figure}
 
-%Longest common subsequence problem
+O primeiro grafo gerado pelo velvetg utiliza o arquivo Roadmap e uma estrutura de dados eficiente em memória.
+Esta estrutura é utilizada apenas para a contrução, uma correção de erros simples e uma simplificação do grafo onde nós são concatenados.
+Após essa fase, outra estrutura de dados é utilizada para que os algoritmos de correção de erro possam manipular mais facilmente o grafo.
 
+A remoção de erros é realizada pelo algoritmo Tour Bus.
+O tratamento das repetições é realizado por dois algoritmos: o Tour Bus e o Pebble \cite{Zerbino2009}
+Depois que a primeira estrutura ou scaffold é gerada pelo algoritmo pebble, uma busca heurística em profundidade é realizada e a estrutura final é gerada.
+Com isso o arquivo \emph{contigs.fa} é gerado onde estão todos os contigs da montagem.
 
-\section{Alinhamento de sequências}
+\section{ASiD}
 
-O alinhamento consiste em comparar duas ou mais sequências
-procurando por uma série ou padrões de letras que estão na mesma ordem
-entre nas sequências.
-Podemos ``desenhar'' um alinhamento escrevendo uma sequência em cada
-linha, e após isso, as letras idênticas são colocadas na mesma coluna,
-indicando através de uma linha entre elas. As letras diferentes podem
-ser colocadas na mesma coluna ou deixar um espaço caso necessário.
-
-Existem dois tipos de alinhamentos: o global e o local. Exemplificados
-pela figura.
-
-No alinhamento global de sequências queremos que o maior número possível
-de letras em cada leitura sejam alinhados até o final. Sequências que
-são bem similares e de tamanhos parecidos são bons candidatos para esse
-tipo de alinhamento. No alinhamento local regiões muito similares entre
-as leituras são alinhadas.
+A programa Assembly Assistant for SOLiD System tem duas funcionalidades: preencher os gaps nos scaffolds e converter as leituras de 'color-space' para 'base-space'.
+A primeira está habilitada apenas quando as leituras estão pareadas.
+Nas leituras pareadas, cada leitura está conectada a outra leitura por uma distância estimada de bases da outra.
+Para isso ele cria um arquivo com uma coleção de leituras que são as mais prováveis para realizar a união de dois contigs, com esse arquivo ele utiliza o velvet para realizar uma nova montagem. Se o novo contig gerado possui uma sobreposição entre os dois contigs originais, esses são concatenados.
 
 
 
-\section{Alinhamento de sequências utilizando palavras}
 
-Quando não estamos procurando apenas a solução ótima para o alinhamento
-entre sequências podemos utilizar um algoritmo mais rápido para achar
-uma solução aproximada ou satisfatória para a comparação.
-
-Um método para comparar rapidamente leituras é realizar uma busca por
- palavras ou k-tuplas dentro de uma leitura. De uma maneira similiar
-utilizado pelo programa FASTA, vamos procurar por palavras iguais dentro
-das leituras, certificando assim que K bases contínuas são iguais.
-
-
-Exemplo:
-
-Para realizarmos o alinhamento entre as duas sequências devemos primeiro
-dividir cada leitura em palavras de tamanho K. Por exemplo na leitura
-ACCTGCCATA que tem 10 bases, vamos utilizar uma palavra de tamanho
-8. Assim a leitura gerará três palavras: ACCTGCCA, CCTGCCAT e
-CTGCCATA. Faremos a mesma coisa com a segunda leitura CCTGCCATAG gerando
-então as palavras: CCTGCCAT, CTGCCATA e TGCCATAG. Agora comparando
-diretamente as palavras entre si, percebemos que há palavras em comum
-entre ambas as leituras: CCTGCCAT e CTGCCATA . Essas duas palavras
-representam 9 entre as 10 bases de cada leitura, ou seja, 90\% de
-similaridade. E podemos alinhar essas duas leituras utilizando as bases
-em comum.
-
-%/figura
-
-Apesar desse algoritmo poder não encontrar o alinhamento ótimo, ele é
-mais simples que algoritmo de programação dinâmia de Smith-Waterman.
-Esse algoritmo pode ser implementado usando tabelas hash, e com isso o
-número de comparações aumenta linearmente em proporção ao tamanho médio
-das leituras. As comparações da programação dinâmica por outro lado
-aumenta entre oquadrado e o cubo do tamanho médio das leituras.
-
-O tamanho da palavra é determinado pelo usuário. Esse parâmetro deve ser
-cuidadosamente escolhido, se o tamanho da palavra for muito próxima do
-tamanho da leitura, será mais difícil obter um alinhamento. No caso
-contrário se o tamanho da palavra for muito diferente do tamanho da
-leitura, e a busca pode retornar um número muito alto de leituras,
-incluindo as não possuem pouca similaridade.
-
-
-
- como utilizar os alinhamentos para produzir um contig
-[ definir o problema da montagem de forma geral ]
-
-Voltando a analogia com o quebra-cabeças, utilizando o alinhamento,
-sabemos como comparar as leituras e entender como as peças se
-``encaixam''.  O último passo é utilizar as comparações para alinhar
-todas as leituras afim de criar um ou mais contigs.
-Uma representação desses alinhamentos pode ser feito criando um grafo,
-onde cada leitura é um nó e os alinhamentos são as arestas. Para
-realizar uma montagem, vamos todas as leituras
-apenas uma vez com o melhor alinhamento possível par a par.
-Modelando o problema no grafo, queremos achar um caminho nele, passando
-por cada nó apenas uma vez. Esse problema é descrito como encontrar o
-caminho hamiltoniano no grafo.
-
-
-\chapter{Montagem nos Sequenciadores Tradicionais}
-
-Vamos definir como sequenciadores tradicionais todos aqueles que geram
-leituras acima de 500 bp e com o número de leituras de no máximo 1000.
-Com essas limitações é possível utilizar a estratégia descrita a seguir
-para se realizar a montagem do genoma:
-
-1. Comparar par a par as leituras utilizando o algoritmo guloso.
-2. Criar um grafo com arestas de peso relativos à comparação.
-3. Achar o caminho halmiltoniano no grafo.
-
-O sequenciamento genético tem uma grande importância na biologia
-moderna. O Projeto do Genoma Humano é um exemplo da importância da
-tecnologia de sequenciamento, as informações do sequenciamento levam a
-compreensão de doenças relacionadas a variação genética, gerando impacto
-na biologia quanto também na medicina.
-[ mostrar os métodos e os algoritmos utilizados pelos montadores
-  tracidionais como o phred/phrap ]
-
-\chapter{Montagem nos Sequenciadores de Nova Geração}
-
-[ mostrar como realizar a montagem para os sequenciadores de nova
-  geração sem a utilização do grafo de bruijn:
-  falar sobre os montadores desse estilo: VCAKE, SOAPDenovo]
-
-%\chapter{Montagem nos Sequenciadores de Nova Geração utilizando grafo de
-%  bruijn}
-
-%[ mostrar como realizar a montagem utilizando o grafo de bruijn e falar
-%  sobre alguns montadores desse estilo: abyss, velvet ]
-
-%\chapter{O algoritmo Pebble e Montador Velvet}
-
-%[ falar com mais detalhes sobre o velvet e os algoritmos utilizados por
-%  ele. Colocar alguns datlhes da implementação aqui ]
-
+%\chapter{Experimentos VelvetH}
