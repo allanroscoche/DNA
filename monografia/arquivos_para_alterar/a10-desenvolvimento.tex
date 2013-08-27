@@ -265,12 +265,13 @@ para cada tarefa.
 Com a retirada do Saet do pipeline, duas novas estratégias para a redução de
 erros são propostos baseados nas qualidades de cada base.
 
-\subsection{Pontuação por posição}
+%\subsection{Pontuação por posição}
 A estratégia por posição utiliza um valor minimo de qualidade como
-referência.
+referência. A qualidade de cada base é comparada com o valor mínimo a partir da primeira até a última.
+A pontuação de cada leitura será a posição até a primeira qualidade abaixo do limite.
+Dessa maneira a pontuação de cada leitura refletirá o número de kmers em que todas as bases estão acima do limite.
 
-
-\subsection{Pontuação acumulada}
+%---------
 
 
 
