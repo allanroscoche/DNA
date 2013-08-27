@@ -10,11 +10,10 @@ exclusiva de dados.
 %Sequenciamento Genético: O que é? Como é realizado? Por que estudar?
 %NGS: O que é?
 %ABI SOLiD4:
+%Sequenciamento por ligação
 %ColorSpace:
-
-%sequencing by synthesis--
-%pyrosequencing
-
+%Qualidade das leituras
+%Pontuação de qualidade PHRED
 
 %----------------------
 
@@ -243,6 +242,11 @@ Para isso ele cria um arquivo com uma coleção de leituras que são as mais prováv
 
 \chapter{Proposta}
 
+Neste capítulo duas propostas são apresentadas.
+A primeira tem como objetivo diminuir a necessidade de recursos computacionais como também explorar novas heurísticas para remoção de erros pré-montagem.
+A segunda proposta veio da necessidade em descobrir qual é o tamanho $k$ ideal para realizar uma montagem. Uma estrutura de dados é utilizada para realizar uma busca por esse melhor tamanho.
+
+
 \section{Pipeline Solid}
 Uma das grandes dificuldades para lidar com os arquivos gerados pelos
 NGSs é o tamanho dos dados gerados. Arquivos de texto com mais de 10Gb
@@ -262,20 +266,29 @@ para cada tarefa.
 \label{pipeline_presolid}
 \end{figure}
 
-Com a retirada do Saet do pipeline, duas novas estratégias para a redução de
-erros são propostos baseados nas qualidades de cada base.
+Com a retirada do Saet do pipeline, uma estratégia para a redução de
+erros é proposto baseados nas qualidades de cada base.
 
 %\subsection{Pontuação por posição}
-A estratégia por posição utiliza um valor minimo de qualidade como
+A estratégia utiliza um valor minimo de qualidade como
 referência. A qualidade de cada base é comparada com o valor mínimo a partir da primeira até a última.
-A pontuação de cada leitura será a posição até a primeira qualidade abaixo do limite.
-Dessa maneira a pontuação de cada leitura refletirá o número de kmers em que todas as bases estão acima do limite.
+A pontuação de cada leitura será a posição até a primeira qualidade abaixo do limite seja encontrada, ou o tamanho da leitura caso todas as qualidades estejam acima do limite.
+Dessa maneira leituras com pontuações maiores podem gerar mais kmers confiáveis, pois devido ao sequenciamento por ligação, se uma base não é confiável no meio da leitura, todas as bases subsequêntes também não são.
+Após a pontuação de cada leitura, ela é ignorada se não obter uma pontuação máxima.
+
+Essa eliminação de leituras também é utilizada como uma forma de diminuir a cobertura das leituras, fase que é realizada após a identificação de erros.
+
+Após isso as leituras são convertidos para pseudobases e escritas em disco para a utilização do velvet.
 
 %---------
-
-
-
 \section{K-mer virtual}
+
+Como foi visto no \ref{}, uma das dificuldades ao se utilizar o grafo de bruijn é escolher o tamanho dos kmers.
+Um método muito simples para achar o melhor tamanho é realizar várias montagens variando o $k$ dentro de um intervalo e achar a melhor montagem.
+ É proposta uma nova estrutura de dados em que o tamanho $k$ está relacionado com a organização da estrutura, e deste modo, variar o tamanho do $k$ sem que seja necessário executar todo o pipeline. 
+
+
+
 
 \begin{figure}[ht] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
 \begin{center}
