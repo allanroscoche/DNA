@@ -1,16 +1,54 @@
 \chapter{Sequenciamento Genético}
-O sequenciamento genético tem como objetivo descobrir a sequência completa de DNA do genoma de um organismo.
-%Para a realização do sequenciamento processos químicos são utilizados para a identificação dos nucleotídios da sequência.
+
+Este capítulo descreve brevemente o sequenciamento genético e os
+\emph{Next Generation Sequencers}(NGS).
+Será detalhado o funcionamento do sequenciador SOLiD4 e sua codificação
+exclusiva de dados.
+
+
+%-----------------------
+%Sequenciamento Genético: O que é? Como é realizado? Por que estudar?
+%NGS: O que é?
+%ABI SOLiD4:
+%ColorSpace:
+
+%sequencing by synthesis--
+%pyrosequencing
+
+
+%----------------------
+
+O sequenciamento genético é utilizado para determinar a sequência de
+genes individuais, cromossomos ou genomas completos. O foco desse
+trabalho está no sequênciamento 'de novo' de genomas completos. A
+expressão \emph{de novo} é utilizada para expressar o sequenciamento de
+genomas que ainda desconhecidos, ou seja, onde nenhum sequenciamento
+já tenha sido realizado.
+%Para a realização do sequenciamento processos químicos são utilizados
+%para a identificação dos nucleotídios da sequência.
 %Agressive Assembly of pyrosequencing reads with mates
-Para isso são utilizados sequenciadores, máquinas que automatizam os
-processos químicos utilizados para a identificação dos nucleotídios das
-leituras.
-Os sequenciadores produzem leituras do DNA em forma de uma sequencia de
-bases nucléicas.
+
+O ácido desoxirribonucleico(ADN, em ingles: DNA) é um longo polímero
+formada por unidades repetidas chamadas nucleotídeos \ref .
+%Alberts, Bruce; Alexander Johnson, Julian Lewis, Kazuo, Martin Raff,
+%Keith Roberts, and Peter Walters. Molecular Biology of the Cell; Fourth
+%Edition. Nova Iorque e Londres: Garland Science, 2002. ISBN 0-8153-3218-1
+
+Os nucleotídios presentes no DNA são: citosina, adenina, guanina e
+timina, e vão ser representados respectivamente pelas letras: $C$, $A$,
+$G$ e $T$.
+
+Para a identificação dos nucleotídios são utilizados sequenciadores, máquinas que automatizam os
+processos químicos utilizados para a identificação das bases nitrogenadas.
+
+
+
 Cada sequenciador difere na quantidade e na qualidade das leituras
 produzidas devido aos processos químicos aplicados.
-As leituras possuem um tamanho máximo determinado pela tecnologia
-utilizada no sequenciador. Devido a essa limitação de tamanho, várias leituras são necessárias para cobrir todo o genoma de um organismo.
+
+
+%As leituras possuem um tamanho máximo determinado pela tecnologia
+%utilizada no sequenciador. Devido a essa limitação de tamanho, várias leituras são necessárias para cobrir todo o genoma de um organismo.
 %Todo método de sequenciamento passa pela fase de clonagem, nesta fase um organismo vetor é utilizado para se obter as leituras, por causa disso, o tamanho das leituras é limitado pela capacidade do organismo vetor.
 
 %Quando o sequenciamento é realizado sequencialmente, isto é, cada sequência é obtida uma após a outra, o método é chamado sequenciamento direcinado, e quando várias sequências são produzidas paralelamente o método de sequenciamento é chamado aleatório ou shotgun.
@@ -27,7 +65,6 @@ e são consideravelmente mais baratas que o método Sanger na plataforma ABI 3730x
 % [2-4].
 %High-quality draft assemblies of mammalian genomes from massively parallel sequence data
 A princípio, isso deveria tornar possível a diminuição drástica do custo de gerar a montagem de genomas. Na prática, entretanto, isso tem sido difícil porque as novas tecnologias produzem leituras de até 100 bases de tamanho( comparando com $>$ 700 bases da tecnologia Sanger). Esse leituras curtas são também menos confiáveis. Por ambos os motivos, esses dados são mais difíceis de montar numa sequencia contínua e conectada.
-
 Devido a essas características, para o sequenciamento 'de novo' utilizando NGS's é utilizada uma grande cobertura do genoma, entre 30x e 600x para compensar esses problemas.
 
 %B. Ewing, P. Green, Base-calling of automated sequencer traces using phred.
@@ -198,12 +235,55 @@ Para isso ele cria um arquivo com uma coleção de leituras que são as mais prováv
 
 
 
-\chapter{Experimentos}
+%\chapter{Experimentos}
 
-Umas das primeiras decisões ao se utilizar o pipeline é o
-tamanho $k$ a utilizar.
+%Umas das primeiras decisões ao se utilizar o pipeline é o
+%tamanho $k$ a utilizar.
 
 
 \chapter{Proposta}
+
+\section{Pipeline Solid}
+Uma das grandes dificuldades para lidar com os arquivos gerados pelos
+NGSs é o tamanho dos dados gerados. Arquivos de texto com mais de 10Gb
+normalmente são utilizados e copiados a cada estágio do pipeline.
+
+Para diminuir o tempo gasto em disco, um novo pipeline mostrado na fig
+\ref{pipeline_presolid} é proposto. As três primeiras fases são
+realizadas por um único programa que manipula as leituras em memória
+para cada tarefa.
+
+\begin{figure}[ht] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+\begin{center}
+\includegraphics[scale=.5]{./figuras/pipeline_presolid.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medid), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
+\end{center}
+
+\caption[Nós do grafo de bruijn utilizado no velvet]{Exemplo de nós do grafo de bruijn gerado pelo velvet}
+\label{pipeline_presolid}
+\end{figure}
+
+Com a retirada do Saet do pipeline, duas novas estratégias para a redução de
+erros são propostos baseados nas qualidades de cada base.
+
+\subsection{Pontuação por posição}
+A estratégia por posição utiliza um valor minimo de qualidade como
+referência.
+
+
+\subsection{Pontuação acumulada}
+
+
+
+\section{K-mer virtual}
+
+\begin{figure}[ht] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+\begin{center}
+\includegraphics[scale=.5]{./figuras/pipeline_prevelvet.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medid), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
+\end{center}
+
+\caption[Nós do grafo de bruijn utilizado no velvet]{Exemplo de nós do grafo de bruijn gerado pelo velvet}
+\label{pipeline_prevelvet}
+\end{figure}
+
 
 \chapter{Cronograma}
