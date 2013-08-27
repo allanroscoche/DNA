@@ -23,9 +23,12 @@ trabalho está no sequênciamento 'de novo' de genomas completos. A
 expressão \emph{de novo} é utilizada para expressar o sequenciamento de
 genomas que ainda desconhecidos, ou seja, onde nenhum sequenciamento
 já tenha sido realizado.
+
 %Para a realização do sequenciamento processos químicos são utilizados
 %para a identificação dos nucleotídios da sequência.
 %Agressive Assembly of pyrosequencing reads with mates
+
+\section{Sequenciadores}
 
 O ácido desoxirribonucleico(ADN, em ingles: DNA) é um longo polímero
 formada por unidades repetidas chamadas nucleotídeos \ref .
@@ -41,7 +44,6 @@ Para a identificação dos nucleotídios são utilizados sequenciadores, máquinas qu
 processos químicos utilizados para a identificação das bases nitrogenadas.
 
 
-
 Cada sequenciador difere na quantidade e na qualidade das leituras
 produzidas devido aos processos químicos aplicados.
 
@@ -51,11 +53,10 @@ produzidas devido aos processos químicos aplicados.
 %Todo método de sequenciamento passa pela fase de clonagem, nesta fase um organismo vetor é utilizado para se obter as leituras, por causa disso, o tamanho das leituras é limitado pela capacidade do organismo vetor.
 
 %Quando o sequenciamento é realizado sequencialmente, isto é, cada sequência é obtida uma após a outra, o método é chamado sequenciamento direcinado, e quando várias sequências são produzidas paralelamente o método de sequenciamento é chamado aleatório ou shotgun.
+%\section{Método Shotgun de sequenciamento}
+%O método shotgun de sequenciamento consiste em obter várias sequências aleatórias do genoma paralelamente.
+%Desse modo para obter o genoma a ser sequenciado é necessário a montagem dessas leituras. A montagem é um processo computacional onde as sequências são comparadas entre si e atraves dessas comparações é gerado uma aproximação do genoma sequênciado. Essa aproximação é formada por um conjunto de strings chamados contigs e a ausencia de strings chamados gaps.
 
-
-\section{Método Shotgun de sequenciamento}
-O método shotgun de sequenciamento consiste em obter várias sequências aleatórias do genoma paralelamente.
-Desse modo para obter o genoma a ser sequenciado é necessário a montagem dessas leituras. A montagem é um processo computacional onde as sequências são comparadas entre si e atraves dessas comparações é gerado uma aproximação do genoma sequênciado. Essa aproximação é formada por um conjunto de strings chamados contigs e a ausencia de strings chamados gaps.
 
 \section{Next Generation Sequencers - NGS}
 %Evaluation of next generation sequencing platforms for population targeted sequencing studies
@@ -81,74 +82,73 @@ Uma desvantagem na utilização do 'color space' é que a conversão para
 bases nucléicas é que os erros são amplificados durante a tradução, por
 isso, a manipulação dessas sequências são realizadas no formato 'color space'.
 
+\section{Sequenciamento por ligação}
 
-\chapter{Montagem das leituras}
+\section{Colorspace}
+
+\section{Qualidade das leituras}
 
 
-O problema da montagem é, através das leituras obtidas pelo sequenciador, obter o genoma sendo sequenciado.
-As maiores dificuldades na montagem estão: nos erros encontrados nas leituras, a detecção regiões repetitivas e perceber a falta de cobertura para alguma região do genoma.
+%\chapter{Montagem das leituras}
 
-Alguns montadores utilzam um grafo de sobreposições para realizar a
-montagem.
-O nós do grafo representas as leituras do sequenciador e as arestas
-representam um alinhamento local entre duas leituras.
-Um peso é atribuído a cara aresta de acordo com a qualidade do alinhamento.
-A montagem é realizada procurando um caminho halmitoniano nesse grafo,
-contudo, esse é um problema NP-completo.
+%O problema da montagem é, através das leituras obtidas pelo sequenciador, obter o genoma sendo sequenciado.As maiores dificuldades na montagem estão: nos erros encontrados nas leituras, a detecção regiões repetitivas e perceber a falta de cobertura para alguma região do genoma.
 
-\section{Montagem utilizando um grafo de Bruijn}
-Contudo devido a grande quantidade de leituras que um NGS(Next
-Generation Sequencer) produz é necessária uma outra abordagem para a
-montagem.
-Para evitar a comparação todos-contra-todos entre as leituras, elas são
-divididas em pedaços menores e é realizada uma comparação direta desse pedaços.
-Esses pedaços são chamados kmers e são utilizados para a criação do grafo de bruijn.
+%Alguns montadores utilzam um grafo de sobreposições para realizar a montagem. O nós do grafo representas as leituras do sequenciador e as arestas representam um alinhamento local entre duas leituras.
+%Um peso é atribuído a cara aresta de acordo com a qualidade do alinhamento.
+%A montagem é realizada procurando um caminho halmitoniano nesse grafo, contudo, esse é um problema NP-completo.
+
+%\section{Montagem utilizando um grafo de Bruijn}
+%Contudo devido a grande quantidade de leituras que um NGS(Next
+%Generation Sequencer) produz é necessária uma outra abordagem para a
+%montagem.
+%Para evitar a comparação todos-contra-todos entre as leituras, elas são
+%divididas em pedaços menores e é realizada uma comparação direta desse pedaços.
+%Esses pedaços são chamados kmers e são utilizados para a criação do grafo de bruijn.
 
 %Esses pedaços são chamados de k-mers e são utilizados nas duas estratégias a seguir:
 %\subsection{read expansion}
 %No read expansion, após dividirmos as leituras em tamanhos menores é utilizada uma estrutura de dados para indexar esses pedaçõs e realizando buscas nessa estrutura procuramos por outros pedaços que possam ser alinhados e, desse modo, expandimos uma leitura adicionando novas bases encontradas nas buscas. O montador SSAKE utiliza essa estratégia.
 %\subsection{grafo de bruijn}
-No grafo de bruijn cada kmer é um nó e cada aresta é uma relação de igualdade de $k-1$ letras.
-Para uma representação mais simples é utilizada uma versão condensada do grafo como visto na \ref{bruijn}.
-Em $A$ é gerado o grafo de bruijn da leitura e em $B$ o grafo de convertido para a forma condensada.
+%No grafo de bruijn cada kmer é um nó e cada aresta é uma relação de igualdade de $k-1$ letras.
+%Para uma representação mais simples é utilizada uma versão condensada do grafo como visto na \ref{bruijn}.
+%Em $A$ é gerado o grafo de bruijn da leitura e em $B$ o grafo de convertido para a forma condensada.
 
-\begin{figure}[ht] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
-\begin{center}
-\includegraphics[scale=.5]{./figuras/bruijn2.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medid), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
-\end{center}
+%\begin{figure}[ht] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
+%\begin{center}
+%\includegraphics[scale=.5]{./figuras/bruijn2.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medid), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
+%\end{center}
 
-\caption[Grafo de Bruijn]{Exemplo de um grafo de bruijn gerado por uma sequência de bases}
-\label{bruijn}
-\end{figure}
+%\caption[Grafo de Bruijn]{Exemplo de um grafo de bruijn gerado por uma sequência de bases}
+%\label{bruijn}
+%\end{figure}
 
-Após a contrução do grafo de bruijn, um supercaminho euleriano é
-encontrado nesse grafo, e com isso realizamos a montagem das leituras.
-A principal vantagem de se utilizar o grafo de bruijn deve-se ao fato do
-problema do supercaminho euleriano possuir um algoritmo de tempo
-polinomial.
-Tornando viável a sua utilização por montadores NGS.
+%Após a contrução do grafo de bruijn, um supercaminho euleriano é
+%encontrado nesse grafo, e com isso realizamos a montagem das leituras.
+%A principal vantagem de se utilizar o grafo de bruijn deve-se ao fato do
+%problema do supercaminho euleriano possuir um algoritmo de tempo
+%polinomial.
+%Tornando viável a sua utilização por montadores NGS.
 
-\section{Correção de Erros}
-A diferenciação principal entre os montadores dos NGS está nos algoritmos utilizados para o tratamento de erros do sequenciamento.
-A correção de erros pode ser feito antes da realização da montagem ou
-após a contrução do grafo. A principal característica da remoção de
-erros pré-montagem é a utilização do arquivo de qualidade como forma de
-eliminar ou corrigir leituras problemáticas. A fig \ref{erro_leitura} demonstra uma
-leitura com erros. As posições onde a base não pode ser determinada está
-representada com pontos. Abaixo da leitura está a qualidade de cada
-posição onde é possível observar a qualidade $-1$ nas posições onde há pontos.
+%\section{Correção de Erros}
+%A diferenciação principal entre os montadores dos NGS está nos algoritmos utilizados para o tratamento de erros do sequenciamento.
+%A correção de erros pode ser feito antes da realização da montagem ou
+%após a contrução do grafo. A principal característica da remoção de
+%erros pré-montagem é a utilização do arquivo de qualidade como forma de
+%eliminar ou corrigir leituras problemáticas. A fig \ref{erro_leitura} demonstra uma
+%leitura com erros. As posições onde a base não pode ser determinada está
+%representada com pontos. Abaixo da leitura está a qualidade de cada
+%posição onde é possível observar a qualidade $-1$ nas posições onde há pontos.
 
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[scale=.8]{./figuras/erro_leitura.eps}
-\end{center}
+%\begin{figure}[ht]
+%\begin{center}
+%\includegraphics[scale=.8]{./figuras/erro_leitura.eps}
+%\end{center}
 
-\caption[Leitura com erro]{Exemplo de leitura com erros}
-\label{erro_leitura}
-\end{figure}
+%\caption[Leitura com erro]{Exemplo de leitura com erros}
+%\label{erro_leitura}
+%\end{figure}
 
-Erros de sequenciamento também podem ser detectados após a contrução do
-grafo.
+%Erros de sequenciamento também podem ser detectados após a contrução do grafo.
 
 \chapter{Pipeline Solid}
 
@@ -171,6 +171,8 @@ Podemos observar na figura ~\ref{pipeline} o pipeline denovo.
 O pipeline constituído por uma série de programas que preparam os dados para um montador capaz de realizar a montagem em 'color space' e além disso realizam outros processos para melhorar a qualidade da montagem.
 Neste capítulo não vamos mostrar todos os softwares, apenas aqueles que foram necessários ao estudo.
 
+\section{rsampling}
+
 
 \section{saet}
 O SOLiD Accuracy Enhancement Tool(SAET) é usado para a correção de erros pré-montagem.
@@ -189,7 +191,7 @@ O software é dividido em dois executáveis: o velveth e o velvetg.
 
 %No velvet, cada nó do grafo é ligado ao seu complemento genético formando assim um bloco.
 
-%\subsection{velveth}
+\subsection{velveth}
 No velveth ocorre a fase de criação dos kmers, o arquivo de leituras é
 carregado na memória e os kmers são gerados. Uma tabela hash é utilizada
 para o armazenamento dos kmers para então o arquivo de saída Roadmap ser gerado.
@@ -197,7 +199,7 @@ para o armazenamento dos kmers para então o arquivo de saída Roadmap ser gerado.
 
 %Na versão paralela do velveth utilizando o OpenMP a escrita no arquivo Roadmap depende do escalonamento do processador, tornando o programa velvet não determinístico.
 
-%\subsection{velvetg}
+\subsection{velvetg}
 O velvetg constrói um grafo de bruijn a partir do arquivo gerado pelo
 velveth. Cada nó no grafo é uma série de kmers sobrepostos.
  Kmers adjacentes sobrepõe-se k-1 nucleotídios e a informação
@@ -247,7 +249,7 @@ A primeira tem como objetivo diminuir a necessidade de recursos computacionais c
 A segunda proposta veio da necessidade em descobrir qual é o tamanho $k$ ideal para realizar uma montagem. Uma estrutura de dados é utilizada para realizar uma busca por esse melhor tamanho.
 
 
-\section{Pipeline Solid}
+\section{Pré processamento único}
 Uma das grandes dificuldades para lidar com os arquivos gerados pelos
 NGSs é o tamanho dos dados gerados. Arquivos de texto com mais de 10Gb
 normalmente são utilizados e copiados a cada estágio do pipeline.
@@ -281,11 +283,12 @@ Essa eliminação de leituras também é utilizada como uma forma de diminuir a cobe
 Após isso as leituras são convertidos para pseudobases e escritas em disco para a utilização do velvet.
 
 %---------
-\section{K-mer virtual}
+\section{Variação dinâmica do tamanho K}
 
 Como foi visto no \ref{}, uma das dificuldades ao se utilizar o grafo de bruijn é escolher o tamanho dos kmers.
 Um método muito simples para achar o melhor tamanho é realizar várias montagens variando o $k$ dentro de um intervalo e achar a melhor montagem.
- É proposta uma nova estrutura de dados em que o tamanho $k$ está relacionado com a organização da estrutura, e deste modo, variar o tamanho do $k$ sem que seja necessário executar todo o pipeline. 
+É proposta uma nova estrutura de dados em que o tamanho $k$ pode variar sem que seja necessário executar todo o pipeline.
+
 
 
 
