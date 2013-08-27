@@ -236,7 +236,13 @@ Para isso ele cria um arquivo com uma coleção de leituras que são as mais prováv
 
 
 
-%\chapter{Experimentos}
+\chapter{Problema}
+
+Montadores baseados no gráfico de Bruijn dependem muito de um parametro
+\emph{k}, que representa um equilíbrio de vários fatores difíceis de
+quantificar.
+%Chikhi, Rayan Medvedev, Paul
+
 
 %Umas das primeiras decisões ao se utilizar o pipeline é o
 %tamanho $k$ a utilizar.
@@ -288,8 +294,6 @@ Após isso as leituras são convertidos para pseudobases e escritas em disco para 
 Como foi visto no \ref{}, uma das dificuldades ao se utilizar o grafo de bruijn é escolher o tamanho dos kmers.
 Um método muito simples para achar o melhor tamanho é realizar várias montagens variando o $k$ dentro de um intervalo e achar a melhor montagem.
 É proposta uma nova estrutura de dados em que o tamanho $k$ pode variar sem que seja necessário executar todo o pipeline.
-
-
 
 
 
