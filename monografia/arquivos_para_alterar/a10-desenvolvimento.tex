@@ -261,7 +261,9 @@ O pipeline é constituído por uma série de programas que preparam os dados para u
 Neste capítulo não vamos mostrar todos os softwares, apenas aqueles que foram necessários ao estudo.
 
 \section{rsampling}
-
+O \emph{rsampling} por padrão seleciona randomicamente fragmentos para diminuir a
+cobertura para no máximo 300x. Ele também estima a cobertura existente
+necessário para a correção de erros.
 
 
 \section{saet}
@@ -308,7 +310,7 @@ A união desses dois nós é chamado bloco e pode ser observado na fig ~\ref{bruijn
 \end{figure}
 
 O primeiro grafo gerado pelo velvetg utiliza o arquivo Roadmap e uma estrutura de dados eficiente em memória.
-Esta estrutura é utilizada apenas para a contrução, uma correção de erros simples e uma simplificação do grafo onde nós são concatenados.
+Esta estrutura é utilizada apenas para a construção, uma correção de erros simples e uma simplificação do grafo onde nós são concatenados.
 Após essa fase, outra estrutura de dados é utilizada para que os algoritmos de correção de erro possam manipular mais facilmente o grafo.
 
 A remoção de erros é realizada pelo algoritmo Tour Bus.
@@ -327,7 +329,7 @@ Para isso ele cria um arquivo com uma coleção de leituras que são as mais prováv
 \chapter{Proposta}
 
 Uma das grandes dificuldades ao se realizar uma montagem é descobrir
-quais parametros será utilizada na montagem. Especialmente aqueles
+quais parametros serão utilizados na montagem. Especialmente aqueles
 baseados no grafo de Bruijn, como é o Velvet, dependem muito de um
 parametro \emph{k}, que representa um equilíbrio de vários fatores
 difíceis de quantificar.
@@ -386,7 +388,7 @@ para cada tarefa.
 \end{figure}
 
 Com a retirada do Saet do pipeline, uma estratégia para a redução de
-erros é proposto baseados nas qualidades de cada base.
+erros é proposta baseada nas qualidades de cada base.
 
 %\subsection{Pontuação por posição}
 A estratégia utiliza um valor minimo de qualidade como
