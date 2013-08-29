@@ -19,9 +19,9 @@ exclusiva de dados.
 
 O sequenciamento genético é utilizado para determinar a sequência de
 genes individuais, cromossomos ou genomas completos. O foco desse
-trabalho está no sequênciamento 'de novo' de genomas completos. A
+trabalho está no sequênciamento \emph{de novo} de genomas completos. A
 expressão \emph{de novo} é utilizada para expressar o sequenciamento de
-genomas que ainda desconhecidos, ou seja, onde nenhum sequenciamento
+genomas que ainda são desconhecidos, ou seja, onde nenhum sequenciamento
 já tenha sido realizado.
 
 %Para a realização do sequenciamento processos químicos são utilizados
@@ -30,8 +30,9 @@ já tenha sido realizado.
 
 \section{Sequenciadores}
 
-O ácido desoxirribonucleico(ADN, em ingles: DNA) é um longo polímero
-formada por unidades repetidas chamadas nucleotídeos \ref .
+Sequenciadores genéticos são máquinas que automatizam o processo de
+sequenciamento do ácido desoxirribonucleico(ADN, em ingles: DNA).
+O DNA é um longo polímero formada por unidades repetidas chamadas nucleotídeos \cite{Saenger} .
 %Alberts, Bruce; Alexander Johnson, Julian Lewis, Kazuo, Martin Raff,
 %Keith Roberts, and Peter Walters. Molecular Biology of the Cell; Fourth
 %Edition. Nova Iorque e Londres: Garland Science, 2002. ISBN 0-8153-3218-1
@@ -40,12 +41,21 @@ Os nucleotídios presentes no DNA são: citosina, adenina, guanina e
 timina, e vão ser representados respectivamente pelas letras: $C$, $A$,
 $G$ e $T$.
 
-Para a identificação dos nucleotídios são utilizados sequenciadores, máquinas que automatizam os
-processos químicos utilizados para a identificação das bases nitrogenadas.
+Apesar das diversas tecnologias existentes, apenas fragmentos do DNA
+sequenciado podem ser gerados. Assim algum método deve ser aplicado para
+cobrir todo o genoma.
+Fragmentos em posições aleatórias são sequenciados e através do processo
+computacional da montagem, eles são organizados e a sequência completa do DNA
+é obtido. Esse método é chamado sequenciamento \emph{shotgun}.
+
+%O trabalho computacional é através de um conjunto de fragmentos de DNA
+%obter a sequência completa.
 
 
-Cada sequenciador difere na quantidade e na qualidade das leituras
-produzidas devido aos processos químicos aplicados.
+%Para a identificação dos nucleotídios são utilizados sequenciadores, máquinas que automatizam os
+%processos químicos utilizados para a identificação das bases nitrogenadas.
+
+%Cada sequenciador difere na quantidade e na qualidade dos fragmentos produzidas de acordo com a tecnologia de sequenciamento utilizada.
 
 
 %As leituras possuem um tamanho máximo determinado pela tecnologia
@@ -59,13 +69,30 @@ produzidas devido aos processos químicos aplicados.
 
 
 \section{Next Generation Sequencers - NGS}
+
+Os \emph{Next Generation Sequencers}(NGS) são sequenciadores que ao
+utilizar novas tecnologias de sequenciamento, conseguem produzir uma
+quantidade maior de fragmentos e com um custo menor se comparados aos
+sequenciadores tradicionais.
+
 %Evaluation of next generation sequencing platforms for population targeted sequencing studies
-Alguns dos NGSs, incluindo Roche 454, Illumina GA, e ABI SOLiD, são capazes de gerar de três a quatro ordens de magnitude mais leituras
-e são consideravelmente mais baratas que o método Sanger na plataforma ABI 3730xL.
+Alguns dos NGSs, incluindo Roche 454, Illumina GA, e ABI SOLiD, são
+capazes de gerar de três a quatro ordens de magnitude mais leituras e são consideravelmente mais baratas que a plataforma ABI 3730xL.
 % [2-4].
 %High-quality draft assemblies of mammalian genomes from massively parallel sequence data
 A princípio, isso deveria tornar possível a diminuição drástica do custo de gerar a montagem de genomas. Na prática, entretanto, isso tem sido difícil porque as novas tecnologias produzem leituras de até 100 bases de tamanho( comparando com $>$ 700 bases da tecnologia Sanger). Esse leituras curtas são também menos confiáveis. Por ambos os motivos, esses dados são mais difíceis de montar numa sequencia contínua e conectada.
-Devido a essas características, para o sequenciamento 'de novo' utilizando NGS's é utilizada uma grande cobertura do genoma, entre 30x e 600x para compensar esses problemas.
+Devido a essas características, para o sequenciamento \emph{de novo}
+utilizando NGS's é utilizada uma grande cobertura do genoma, entre 30x e
+600x para compensar esses problemas.
+
+%Next-Generation Genome Sequencing: Towards Personalized Medicine
+%Michal Janitz (Editor)
+%ISBN: 978-3-527-32090-5
+Outra característica dos NGSs é a possiblidade de realizar o
+sequenciamento \emph{Mate pair}. Nesse tipo de sequenciamento ao invés
+de um fragmento contínuo são gerados dois fragmentos com um espaço
+estimado conhecido entre eles. Esse método é muito útil no
+sequenciamento \emph{de novo}.
 
 %B. Ewing, P. Green, Base-calling of automated sequencer traces using phred.
 Todos esses novos sequenciadores produzem além da letra que representa a molécula de DNA, o valor numérico representando a qualidade para cada base.
@@ -75,19 +102,81 @@ Todos esses novos sequenciadores produzem além da letra que representa a molécul
 %Although QVs offer extra information, their use generally increases a program's CPU and RAM requirements. Only some of the NGS assembly software exploits QVs.
 Apesar desse número ser uma informação extra, isso normalmente aumenta os requerimentos de CPU e RAM dos programas. Apenas alguns montadores NGS exploram essa informação.
 
-\section{ABI Solid}
-Uma das diferenças da plataforma SOLiD dentre os outros sequenciadores é a codificação de duas bases em que cada ponto representa o encontro de duas bases, logo, cada base é verificada duas vezes.
-Devido a essa característica os dados não são gravados como bases mas sim em 'color space', onde cada cor representa duas bases adjacentes.
-Uma desvantagem na utilização do 'color space' é que a conversão para
-bases nucléicas é que os erros são amplificados durante a tradução, por
-isso, a manipulação dessas sequências são realizadas no formato 'color space'.
+%\section{Sequenciamento por ligação}
 
-\section{Sequenciamento por ligação}
+
+\section{ABI Solid}
+
+O sequenciador \emph{ABI SOLiD4} utiliza o sequenciamento por ligação
+para a geração dos seus fragmentos. Dessa maneira ele é capaz de gerar
+até 1.4 bilhões de fragmamentos por rodada.
+Devido ao sequenciamento por ligação os fragmentos utilizam a
+codificação de duas bases para representar seus fragmentos, nela cada ponto representa o encontro de duas bases, logo, cada base é verificada duas vezes.
+Devido a essa característica os dados não são gravados como bases mas sim em \emph{color space}, onde cada cor representa duas bases adjacentes.
+Uma desvantagem na utilização do \emph{color space} é que a conversão para
+bases nucléicas os erros são amplificados durante a tradução, por
+isso, a manipulação dessas sequências são realizadas no formato \emph{color space}.
+
 
 \section{Colorspace}
 
+Os sequenciadores produzem um ou mais arquivos de texto com os fragmentos gerados
+durante o sequenciamento.
+O sequenciador \emph{ABI SOLiD4} produz um arquivo com os fragmentos e
+outro arquivo para qualidades ou dois arquivos de fragmentos e dois
+arquivos de qualidades no sequenciamento \emph{mate pair}.
+
+Esse arquivo está no formato \emph{csfasta} como mostrado na fig \ref{csfasta}.
+Cada fragmento é constituído por duas linhas, uma iniciada com o
+caractere $>$ seguido por um código identificador e outra linha iniciada
+com o caractere $T$ seguido por uma série de números que representam as
+cores.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[scale=.5]{./figuras/csfasta.eps}
+\end{center}
+
+\caption[ Fragmetno csfasta Ecoli ]{Fragmento csfasta Ecoli }
+\label{csfasta}
+\end{figure}
+
+
+O velvet não consegue trabalhar nesse formato, contudo a conversão dos
+fragmentos em \emph{colorspace} para \emph{basespace} antes da montagem
+é desencorajada pela \emph{Life Tecnologies}, empresa responsável pelo
+sequenciador \emph{ABI SOLiD4}. Por esse motivo a leitura é convertida
+para o formato \emph{pseudobases}, onde letras representam as cores e
+apenas as informações dos nucleotídios são mantidas.
+
+
 \section{Qualidade das leituras}
 
+O sequenciador \emph{ABI SOLiD4} utiliza a pontuação de qualidade
+\emph{phred}.
+Cada nucleotídio possui um número que representa a probabilidade de erro
+no seu sequenciamento.
+
+A tabela \ref{phred_quality} mostra alguns exemplos de valores.
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[scale=.4]{./figuras/phred_quality.eps}
+\end{center}
+\caption[ Qualidade do fragmento 487\_15\_1964 ] { Qualidade fragmento }
+\label{phred_quality}
+\end{figure}
+
+O arquivo de qualidade é similar ao arquivo com os fragmentos, com a
+diferença de que na segunda linha aparecem os números relativos a pontuação de qualidade separada por espaços.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[scale=.5]{./figuras/csfasta_qual.eps}
+\end{center}
+
+\caption[ Qualidade PHRED]{Qualidade PHRED}
+\label{csfasta_qual}
+\end{figure}
 
 %\chapter{Montagem das leituras}
 
@@ -152,8 +241,8 @@ isso, a manipulação dessas sequências são realizadas no formato 'color space'.
 
 \chapter{Pipeline Solid}
 
-Esse capítulo descreve o funcionamento do pipeline para o sequenciamento 'de novo' utilizando a plataforma SOLiD.
-Devido ao sequenciador solid gerar os seus dados em 'color space', o montador deve ser capaz de manipular os dados nesse formato, e com isso o pipeline se faz necessário para a montagem \cite{Biosystems}.
+Esse capítulo descreve o funcionamento do pipeline para o sequenciamento \emph{de novo} utilizando a plataforma SOLiD.
+Devido ao sequenciador solid gerar os seus dados em \emph{color space}, o montador deve ser capaz de manipular os dados nesse formato, e com isso o pipeline se faz necessário para a montagem \cite{Biosystems}.
 
 %\section{pipeline}
 Podemos observar na figura ~\ref{pipeline} o pipeline denovo.
@@ -168,10 +257,11 @@ Podemos observar na figura ~\ref{pipeline} o pipeline denovo.
 \label{pipeline}
 \end{figure}
 
-O pipeline constituído por uma série de programas que preparam os dados para um montador capaz de realizar a montagem em 'color space' e além disso realizam outros processos para melhorar a qualidade da montagem.
+O pipeline é constituído por uma série de programas que preparam os dados para um montador capaz de realizar a montagem em \emph{color space} e além disso realizam outros processos para melhorar a qualidade da montagem.
 Neste capítulo não vamos mostrar todos os softwares, apenas aqueles que foram necessários ao estudo.
 
 \section{rsampling}
+
 
 
 \section{saet}
@@ -196,7 +286,6 @@ No velveth ocorre a fase de criação dos kmers, o arquivo de leituras é
 carregado na memória e os kmers são gerados. Uma tabela hash é utilizada
 para o armazenamento dos kmers para então o arquivo de saída Roadmap ser gerado.
 %A estrutura de dados utilizada para o armazenamento dos kmers é uma tabela hash onde cada elemento é uma árvore splay de kmers.
-
 %Na versão paralela do velveth utilizando o OpenMP a escrita no arquivo Roadmap depende do escalonamento do processador, tornando o programa velvet não determinístico.
 
 \subsection{velvetg}
@@ -204,10 +293,10 @@ O velvetg constrói um grafo de bruijn a partir do arquivo gerado pelo
 velveth. Cada nó no grafo é uma série de kmers sobrepostos.
  Kmers adjacentes sobrepõe-se k-1 nucleotídios e a informação
  remanescente de cada kmer é sua última base.
- Esse conjunto de bases é chamado sequência.
- Cada nó no grafo é anexado ao nó reflexo que representa o seu
+Esse conjunto de bases é chamado sequência.
+Cada nó no grafo é anexado ao nó reflexo que representa o seu
  complemento reverso das bases nucléicas dos kmers.
- A união desses dois nós é chamado bloco e pode ser observado na fig ~\ref{bruijn-velvet}.
+A união desses dois nós é chamado bloco e pode ser observado na fig ~\ref{bruijn-velvet}.
 
 \begin{figure}[ht] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
 \begin{center}
@@ -228,29 +317,51 @@ Depois que a primeira estrutura ou scaffold é gerada pelo algoritmo pebble, uma 
 Com isso o arquivo \emph{contigs.fa} é gerado onde estão todos os contigs da montagem.
 
 \section{ASiD}
-
-A programa Assembly Assistant for SOLiD System tem duas funcionalidades: preencher os gaps nos scaffolds e converter as leituras de 'color-space' para 'base-space'.
+A programa Assembly Assistant for SOLiD System tem duas funcionalidades: preencher os gaps nos scaffolds e converter as leituras de \emph{color-space} para \emph{base-space}.
 A primeira está habilitada apenas quando as leituras estão pareadas.
 Nas leituras pareadas, cada leitura está conectada a outra leitura por uma distância estimada de bases da outra.
 Para isso ele cria um arquivo com uma coleção de leituras que são as mais prováveis para realizar a união de dois contigs, com esse arquivo ele utiliza o velvet para realizar uma nova montagem. Se o novo contig gerado possui uma sobreposição entre os dois contigs originais, esses são concatenados.
 
 
 
-\chapter{Problema}
+\chapter{Proposta}
 
-Montadores baseados no gráfico de Bruijn dependem muito de um parametro
-\emph{k}, que representa um equilíbrio de vários fatores difíceis de
-quantificar.
+Uma das grandes dificuldades ao se realizar uma montagem é descobrir
+quais parametros será utilizada na montagem. Especialmente aqueles
+baseados no grafo de Bruijn, como é o Velvet, dependem muito de um
+parametro \emph{k}, que representa um equilíbrio de vários fatores
+difíceis de quantificar.
+
+Uma maneira utilizada par descobrir esses parâmetros é a tentativa e
+erro. Várias execuções do pipeline são utilizadas variando os
+parametros e aqueles que produzirem melhores resultados para aquela base
+de dados são mantidos.
+
+%O \ref{} estima o valor do parametro \emph{k} criando histogramas de
+%kmers. Contudo ele ainda não foi testado utilizando pseudobases.
+
+A cada fase do pipeline, os dados sobre os fragmentos são lidos e escritos em disco.
+Fases simples do pipeline como a coversão para pseudobases tornam-se
+caras em tempo de execução devido a leitura e escrita em disco.
+
+
+
+%Montadores baseados no gráfico de Bruijn dependem muito de um parametro
+%\emph{k}, que representa um equilíbrio de vários fatores difíceis de
+%quantificar.
 %Chikhi, Rayan Medvedev, Paul
+
 
 
 %Umas das primeiras decisões ao se utilizar o pipeline é o
 %tamanho $k$ a utilizar.
 
 
-\chapter{Proposta}
+%\chapter{Proposta}
 
-Neste capítulo duas propostas são apresentadas.
+%Neste capítulo duas propostas são apresentadas.
+Para melhorar o desempenho do pipeline duas propostas são apresentas..
+
 A primeira tem como objetivo diminuir a necessidade de recursos computacionais como também explorar novas heurísticas para remoção de erros pré-montagem.
 A segunda proposta veio da necessidade em descobrir qual é o tamanho $k$ ideal para realizar uma montagem. Uma estrutura de dados é utilizada para realizar uma busca por esse melhor tamanho.
 
@@ -291,20 +402,26 @@ Após isso as leituras são convertidos para pseudobases e escritas em disco para 
 %---------
 \section{Variação dinâmica do tamanho K}
 
-Como foi visto no \ref{}, uma das dificuldades ao se utilizar o grafo de bruijn é escolher o tamanho dos kmers.
-Um método muito simples para achar o melhor tamanho é realizar várias montagens variando o $k$ dentro de um intervalo e achar a melhor montagem.
-É proposta uma nova estrutura de dados em que o tamanho $k$ pode variar sem que seja necessário executar todo o pipeline.
+Uma das dificuldades ao se utilizar o grafo de bruijn é escolher o
+tamanho dos kmers.
 
+%Um método muito simples para achar o melhor tamanho é realizar várias montagens variando o $k$ dentro de um intervalo e achar a melhor montagem.
+É proposta uma nova estrutura de dados em que seja possível gerar kmers
+de vários tamanhos $k$ sem que seja necessário refazer toda a estrutura..
 
+Sendo assim, um novo pipeline como é mostrado na fig
+\ref{pipeline_prevelvet} é proposto, substituindo o velveth para a
+geração de kmers.
 
 \begin{figure}[ht] % [especificador de posição]:exemplos [htbp] - h:aqui, t:topo, b:baixo, p:página especial, !: desconsiderar parâmetros internos
 \begin{center}
 \includegraphics[scale=.5]{./figuras/pipeline_prevelvet.eps} %Opções: width (largura em pt ou cm ou vezes se não houver unidade de medida), height (altura em pt, cm ou vezes se não houver unidade de medid), angle (rotação em graus), scale (escala em vezes 0.5= 50%,1.5=150%, etc )
 \end{center}
 
-\caption[Nós do grafo de bruijn utilizado no velvet]{Exemplo de nós do grafo de bruijn gerado pelo velvet}
+\caption[Pipeline utilizado no prevelvet]{Pipeline prevelvet}
 \label{pipeline_prevelvet}
 \end{figure}
 
+% estrutura de dados seria uma tabela hash
 
-\chapter{Cronograma}
+%\chapter{Cronograma}
