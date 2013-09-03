@@ -46,7 +46,7 @@ sequenciado podem ser gerados. Assim algum método deve ser aplicado para
 cobrir todo o genoma.
 Fragmentos em posições aleatórias são sequenciados e através do processo
 computacional da montagem, eles são organizados e a sequência completa do DNA
-é obtido. Esse método é chamado sequenciamento \emph{shotgun}.
+é obtido. Esse método é chamado sequenciamento \emph{shotgun} \cite{Weber1997}.
 
 %O trabalho computacional é através de um conjunto de fragmentos de DNA
 %obter a sequência completa.
@@ -73,7 +73,7 @@ computacional da montagem, eles são organizados e a sequência completa do DNA
 Os \emph{Next Generation Sequencers}(NGS) são sequenciadores que ao
 utilizar novas tecnologias de sequenciamento, conseguem produzir uma
 quantidade maior de fragmentos e com um custo menor se comparados aos
-sequenciadores tradicionais.
+sequenciadores tradicionais \cite{Harismendy2009} \cite{Ruffalo2012}.
 
 %Evaluation of next generation sequencing platforms for population targeted sequencing studies
 Alguns dos NGSs, incluindo Roche 454, Illumina GA, e ABI SOLiD, são
@@ -262,7 +262,7 @@ Neste capítulo não vamos mostrar todos os softwares, apenas aqueles que foram ne
 
 \section{rsampling}
 O \emph{rsampling} por padrão seleciona randomicamente fragmentos para diminuir a
-cobertura para no máximo 300x. Ele também estima a cobertura existente
+cobertura para no máximo 300x. Um parâmetro necessário para a amostragem da cobertura é o tamanho esperado do código genético sendo sequenciado. Ele também estima a cobertura existente
 necessário para a correção de erros.
 
 
@@ -273,20 +273,33 @@ Infelizmente o código-fonte é fechado e não há a possibilidade de um
 estudo mais profundo.
 
 \section{preprocessor}
-Neste estágio, as leituras são convertidas do formato 'color space' para o formato 'pseudobases'.
-Nesse novo formato a primeira base é retirada e cada cor é convertido para uma letra correspondente.
-As letras utilizadas nesse formato não representam as bases nucléicas das leituras, apenas as cores do 'colorspace', a transformação para as bases é realizada apenas na fase final do pipeline.
+Neste estágio, as leituras são convertidas do formato \emph{color space fasta(csfasta)} para o formato \emph{pseudobases}.
+Nesse novo formato a primeira base e a primeira cor é retirada, após isso cada cor é convertido para uma letra correspondente.
+As letras utilizadas nesse formato não representam as bases nucléicas das leituras, apenas as cores do \emph{colorspace}.
+Um arquivo único chamado \emph{doubleEnconded\_input.de} é gerado. Esse arquivo é o único arquivo de entrada para o velvet, ou seja, as informações de qualidade não são utilizadas pelo montador.
+A transformação para as bases é realizada apenas na fase final do pipeline.
 
 \section{Velvet}
 O Velvet é um conjunto de algoritmos que utilizam grafos de Bruijn para a realização da montagem das leituras, eliminando erros e resolvendo repetições \cite{Zerbino2008}.
+Esse montador é o único que suporta a montagem com fragmentos em colorspace.
+A única diferença do montador velvet \emph{colorspace} para o velvet \emph{basespace} está nas inversões de bases.
+
+
 O software é dividido em dois executáveis: o velveth e o velvetg.
 
 %No velvet, cada nó do grafo é ligado ao seu complemento genético formando assim um bloco.
 
 \subsection{velveth}
-No velveth ocorre a fase de criação dos kmers, o arquivo de leituras é
-carregado na memória e os kmers são gerados. Uma tabela hash é utilizada
-para o armazenamento dos kmers para então o arquivo de saída Roadmap ser gerado.
+No velveth ocorre a fase de criação dos kmers, o arquivo com os framentos é
+carregado na memória e os kmers são gerados.
+O número de kmers gerado será a diferença do tamanho do fragmento pelo tamanho k, multiplicado pelo número de fragmentos.
+Utilizando o exemplo da E.coli com cobertura de 600x, cada fragmento tem tamanho 50 e possui o total de 28629492 fragmentos. Utilizando $k$ com valor 31, teremos um total de 543 milhões de kmers para serem armazenados.
+Uma tabela hash é utilizada para o armazenamento dos kmers para então o arquivo de saída Roadmap ser gerado.
+A tabela hash tem um tamanho fixo de 16777216 entradas.
+A função hash depende do valor máximo de kmer determinado na compilação do velvet.
+Para $k$ menores que 32 a função hash é a divisão do kmer pelo tamanho da tabela.
+Cada elemento da tabela é uma árvore Splay. Árvore splay é uma árvore binária equilibrada que tem como característica o acesso rápido a elementos que tenham sido acessados recentemente \cite{Splay}.
+
 %A estrutura de dados utilizada para o armazenamento dos kmers é uma tabela hash onde cada elemento é uma árvore splay de kmers.
 %Na versão paralela do velveth utilizando o OpenMP a escrita no arquivo Roadmap depende do escalonamento do processador, tornando o programa velvet não determinístico.
 
@@ -295,7 +308,7 @@ O velvetg constrói um grafo de bruijn a partir do arquivo gerado pelo
 velveth. Cada nó no grafo é uma série de kmers sobrepostos.
  Kmers adjacentes sobrepõe-se k-1 nucleotídios e a informação
  remanescente de cada kmer é sua última base.
-Esse conjunto de bases é chamado sequência.
+%Esse conjunto de bases é chamado sequência.
 Cada nó no grafo é anexado ao nó reflexo que representa o seu
  complemento reverso das bases nucléicas dos kmers.
 A união desses dois nós é chamado bloco e pode ser observado na fig ~\ref{bruijn-velvet}.
